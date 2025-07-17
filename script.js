@@ -8,7 +8,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 function updateNavbarProfile(user) {
     const profilePic = document.getElementById("profile-pic");
-    const usernameElem = document.getElementById("username");
+    
 
     if (user) {
         const fullName = user.first_name + (user.last_name ? " " + user.last_name : "");
