@@ -3,6 +3,11 @@ document.addEventListener("DOMContentLoaded", function () {
     tg?.expand();
 
     const user = tg?.initDataUnsafe?.user;
+    updateNavbarProfile(user);
+});
+
+// Update navbar profile info
+function updateNavbarProfile(user) {
     const usernameElem = document.getElementById("username");
     const profilePic = document.getElementById("profile-pic");
 
@@ -18,9 +23,9 @@ document.addEventListener("DOMContentLoaded", function () {
     } else if (usernameElem) {
         usernameElem.innerText = "Guest";
     }
-});
+}
 
-
+// Game data
 const gameData = {
     'Flappy Bird': {
         image: 'Flappy_Bird.png',
@@ -44,6 +49,7 @@ const gameData = {
     }
 };
 
+// Show game details
 function showGameDetail(gameName) {
     const data = gameData[gameName];
     if (!data) return;
@@ -64,27 +70,37 @@ function showGameDetail(gameName) {
 
     document.getElementById('game-list-view').style.display = 'none';
     document.getElementById('game-detail-view').style.display = 'flex';
+    document.getElementById('profile-view').style.display = 'none';
 }
 
-
-function showGameList() {
-    document.getElementById('game-list-view').style.display = 'grid';
-    document.getElementById('game-detail-view').style.display = 'none';
-}
-
-function playGame() {
-    alert('Launching game...'); 
-    // Replace with actual game loading mechanism
-}
-
-function showProfileView() {
-    document.getElementById('game-list-view').style.display = 'none';
-    document.getElementById('game-detail-view').style.display = 'none';
-    document.getElementById('profile-view').style.display = 'block';
-}
-
+// Return to game list
 function showGameList() {
     document.getElementById('game-list-view').style.display = 'grid';
     document.getElementById('game-detail-view').style.display = 'none';
     document.getElementById('profile-view').style.display = 'none';
+}
+
+// Play game (dummy function)
+function playGame() {
+    alert('Launching game...');
+}
+
+// Show profile view and populate Telegram user info
+function showProfileView() {
+    const tg = window.Telegram?.WebApp;
+    const user = tg?.initDataUnsafe?.user;
+
+    if (user) {
+        document.getElementById('userName').innerText = user.first_name + (user.last_name ? ' ' + user.last_name : '');
+        document.getElementById('profilePic').src = user.photo_url 
+            ? user.photo_url 
+            : `https://via.placeholder.com/150/4CAF50/ffffff?text=${encodeURIComponent(user.first_name[0])}`;
+    } else {
+        document.getElementById('userName').innerText = 'Guest';
+        document.getElementById('profilePic').src = 'user.png';
+    }
+
+    document.getElementById('game-list-view').style.display = 'none';
+    document.getElementById('game-detail-view').style.display = 'none';
+    document.getElementById('profile-view').style.display = 'block';
 }
