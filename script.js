@@ -6,37 +6,37 @@ document.addEventListener("DOMContentLoaded", function () {
     updateNavbarProfile(user);
 });
 
+// Update navbar profile pic
 function updateNavbarProfile(user) {
     const profilePic = document.getElementById("profile-pic");
 
-    if (user) {
+    if (user && profilePic) {
         profilePic.src = user.photo_url || `https://via.placeholder.com/150/4CAF50/ffffff?text=${encodeURIComponent(user.first_name[0])}`;
-    } else {
+    } else if (profilePic) {
         profilePic.src = 'user.png';
     }
 }
-
 
 const gameData = {
     'Flappy Bird': {
         image: 'Flappy_Bird.png',
         intro: 'Fly the bird between pipes without hitting them!',
-        gallery: ['Flappy_Bird.png','Flappy_Bird.png','Flappy_Bird.png','Flappy_Bird.png','Flappy_Bird.png']
+        gallery: ['Flappy_Bird.png', 'Flappy_Bird.png', 'Flappy_Bird.png', 'Flappy_Bird.png', 'Flappy_Bird.png']
     },
     'Space Invaders': {
         image: 'Flappy_Bird.png',
         intro: 'Defend against waves of alien invaders!',
-        gallery:  ['Flappy_Bird.png','Flappy_Bird.png','Flappy_Bird.png','Flappy_Bird.png','Flappy_Bird.png']
+        gallery: ['Flappy_Bird.png', 'Flappy_Bird.png', 'Flappy_Bird.png', 'Flappy_Bird.png', 'Flappy_Bird.png']
     },
     'Snake': {
         image: 'Flappy_Bird.png',
         intro: 'Eat food to grow the snake, but don’t hit yourself!',
-        gallery:  ['Flappy_Bird.png','Flappy_Bird.png','Flappy_Bird.png','Flappy_Bird.png','Flappy_Bird.png']
+        gallery: ['Flappy_Bird.png', 'Flappy_Bird.png', 'Flappy_Bird.png', 'Flappy_Bird.png', 'Flappy_Bird.png']
     },
     'Tetris': {
         image: 'Flappy_Bird.png',
         intro: 'Fit falling blocks together to clear lines.',
-        gallery:  ['Flappy_Bird.png','Flappy_Bird.png','Flappy_Bird.png','Flappy_Bird.png','Flappy_Bird.png']
+        gallery: ['Flappy_Bird.png', 'Flappy_Bird.png', 'Flappy_Bird.png', 'Flappy_Bird.png', 'Flappy_Bird.png']
     }
 };
 
@@ -133,13 +133,13 @@ function showProfileView() {
     document.getElementById('profile-view').style.display = 'block';
 }
 
-/* ====== Firebase Initialization (No imports required because SDK is loaded via HTML) ====== */
+/* ====== Firebase Initialization ====== */
 const firebaseConfig = {
     apiKey: "AIzaSyCU34AXm29TLwmag5hf6hymFztK2ciW2HI",
     authDomain: "arcadium-test-297c0.firebaseapp.com",
     databaseURL: "https://arcadium-test-297c0-default-rtdb.firebaseio.com",
     projectId: "arcadium-test-297c0",
-    storageBucket: "arcadium-test-297c0.firebasestorage.app",
+    storageBucket: "arcadium-test-297c0.appspot.com",
     messagingSenderId: "1007954059983",
     appId: "1:1007954059983:web:a1c09597d4cfddf010cdba",
     measurementId: "G-F6C4GLX7Q5"
