@@ -83,14 +83,23 @@ function drawScore() {
 
 function gameLoop() {
     if (gameOver) {
-        ctx.fillStyle = 'black';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        ctx.fillStyle = 'white';
-        ctx.font = '30px Arial';
-        ctx.fillText('Game Over', 80, 200);
-        ctx.fillText('Score: ' + score, 110, 240);
-        return;
+    ctx.fillStyle = 'black';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = 'white';
+    ctx.font = '30px Arial';
+    ctx.fillText('Game Over', 80, 200);
+    ctx.fillText('Score: ' + score, 110, 240);
+
+    // Send score to parent for saving
+    if (window.parent && window.parent.saveScore) {
+        window.parent.saveScore('Flappy Bird', score);
     }
+    if (window.parent && window.parent.logEventCustom) {
+        window.parent.logEventCustom('GameOver', { game: 'Flappy Bird', score: score, reason: 'hit_pipe' });
+    }
+    return;
+}
+
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
