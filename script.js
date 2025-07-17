@@ -111,4 +111,5 @@ function showProfileView() {
     document.getElementById('game-list-view').style.display = 'none';
     document.getElementById('game-detail-view').style.display = 'none';
     document.getElementById('profile-view').style.display = 'block';
+    
 }
