@@ -12,19 +12,16 @@
 <body>
 <div class="main">
 
-  <!-- Navbar -->
   <div class="navbar">
     <img src="logo1.jpg" alt="Arcadium Logo"/>
     <div class="profile">
       <p class="balance">0.00</p>
       <div class="telegram-profile">
         <img id="profile-pic" class="profile-pic" src="user.png" alt="Profile Picture" onclick="showProfileView()"/>
-        <p id="username" class="username">Guest</p>
       </div>
     </div>
   </div>
 
-  <!-- Game List View -->
   <div id="game-list-view">
     <h1>Games</h1>
     <div class="game-container">
@@ -47,7 +44,6 @@
     </div>
   </div>
 
-  <!-- Game Detail View -->
   <div id="game-detail-view" style="display: none;">
     <div class="game-image">
       <img id="game-detail-img" src="" alt="Game Image"/>
@@ -65,7 +61,6 @@
     </div>
   </div>
 
-  <!-- Profile View -->
   <div id="profile-view" style="display: none;">
     <button class="backBtn" onclick="showGameList()">
       <i class='bx bx-chevron-left'></i>
@@ -89,10 +84,15 @@
     </div>
   </div>
 
-  <!-- Flappy Game Frame -->
-  <iframe id="flappy-frame" style="display:none; width:100%; height:90vh; border:none;"></iframe>
+  <div id="flappy-container" style="display:none;"></div>
 
 </div>
+
+
+
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 
 <script src="script.js"></script>
 </body>

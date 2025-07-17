@@ -6,50 +6,41 @@ document.addEventListener("DOMContentLoaded", function () {
     updateNavbarProfile(user);
 });
 
-// Update navbar profile info
 function updateNavbarProfile(user) {
-    const usernameElem = document.getElementById("username");
     const profilePic = document.getElementById("profile-pic");
 
     if (user) {
         const fullName = user.first_name + (user.last_name ? " " + user.last_name : "");
-        if (usernameElem) usernameElem.innerText = fullName;
-
-        if (user.photo_url) {
-            if (profilePic) profilePic.src = user.photo_url;
-        } else if (profilePic) {
-            profilePic.src = "https://via.placeholder.com/150/4CAF50/ffffff?text=" + encodeURIComponent(user.first_name[0]);
-        }
-    } else if (usernameElem) {
+        usernameElem.innerText = fullName;
+        profilePic.src = user.photo_url || `https://via.placeholder.com/150/4CAF50/ffffff?text=${encodeURIComponent(user.first_name[0])}`;
+    } else {
         usernameElem.innerText = "Guest";
     }
 }
 
-// Game data
 const gameData = {
     'Flappy Bird': {
         image: 'Flappy_Bird.png',
         intro: 'Fly the bird between pipes without hitting them!',
-        gallery: ['Flappy_Bird.png', 'Flappy_Bird.png', 'Flappy_Bird.png', 'Flappy_Bird.png', 'Flappy_Bird.png']
+        gallery: ['Flappy_Bird.png','Flappy_Bird.png','Flappy_Bird.png','Flappy_Bird.png','Flappy_Bird.png']
     },
     'Space Invaders': {
         image: 'Flappy_Bird.png',
         intro: 'Defend against waves of alien invaders!',
-        gallery: ['Flappy_Bird.png', 'Flappy_Bird.png', 'Flappy_Bird.png', 'Flappy_Bird.png', 'Flappy_Bird.png']
+        gallery:  ['Flappy_Bird.png','Flappy_Bird.png','Flappy_Bird.png','Flappy_Bird.png','Flappy_Bird.png']
     },
     'Snake': {
         image: 'Flappy_Bird.png',
         intro: 'Eat food to grow the snake, but don’t hit yourself!',
-        gallery: ['Flappy_Bird.png', 'Flappy_Bird.png', 'Flappy_Bird.png', 'Flappy_Bird.png', 'Flappy_Bird.png']
+        gallery:  ['Flappy_Bird.png','Flappy_Bird.png','Flappy_Bird.png','Flappy_Bird.png','Flappy_Bird.png']
     },
     'Tetris': {
         image: 'Flappy_Bird.png',
         intro: 'Fit falling blocks together to clear lines.',
-        gallery: ['Flappy_Bird.png', 'Flappy_Bird.png', 'Flappy_Bird.png', 'Flappy_Bird.png', 'Flappy_Bird.png']
+        gallery:  ['Flappy_Bird.png','Flappy_Bird.png','Flappy_Bird.png','Flappy_Bird.png','Flappy_Bird.png']
     }
 };
 
-// Show game details
 function showGameDetail(gameName) {
     const data = gameData[gameName];
     if (!data) return;
@@ -71,21 +62,18 @@ function showGameDetail(gameName) {
     document.getElementById('game-list-view').style.display = 'none';
     document.getElementById('game-detail-view').style.display = 'flex';
     document.getElementById('profile-view').style.display = 'none';
-    document.getElementById('flappy-frame').style.display = 'none';
+    document.getElementById('flappy-container').style.display = 'none';
 }
 
-// Return to game list
 function showGameList() {
     document.getElementById('game-list-view').style.display = 'grid';
     document.getElementById('game-detail-view').style.display = 'none';
     document.getElementById('profile-view').style.display = 'none';
-    document.getElementById('flappy-frame').style.display = 'none';
+    document.getElementById('flappy-container').style.display = 'none';
 }
 
-// Play game
 function playGame() {
     const selectedGame = document.getElementById('game-detail-title').textContent;
-
     if (selectedGame === 'Flappy Bird') {
         launchFlappyArcadium();
     } else {
@@ -93,18 +81,32 @@ function playGame() {
     }
 }
 
-// Launch Arcadium Bird
 function launchFlappyArcadium() {
     document.getElementById('game-list-view').style.display = 'none';
     document.getElementById('game-detail-view').style.display = 'none';
     document.getElementById('profile-view').style.display = 'none';
 
-    const frame = document.getElementById('flappy-frame');
-    frame.src = 'flappy.html';
-    frame.style.display = 'block';
+    const frameContainer = document.getElementById('flappy-container');
+    frameContainer.innerHTML = `
+        <iframe id="flappy-frame" src="flappy.html" style="width:100%; height:80vh; border:none;"></iframe>
+        <div style="margin-top:10px; text-align:center;">
+            <button onclick="retryFlappy()">Retry</button>
+            <button onclick="backToDetail()">Back</button>
+        </div>
+    `;
+    frameContainer.style.display = 'block';
 }
 
-// Show profile view and populate Telegram user info
+function retryFlappy() {
+    const frame = document.getElementById('flappy-frame');
+    frame.src = frame.src;
+}
+
+function backToDetail() {
+    document.getElementById('flappy-container').style.display = 'none';
+    showGameDetail('Flappy Bird');
+}
+
 function showProfileView() {
     const tg = window.Telegram?.WebApp;
     tg?.expand?.();
@@ -116,19 +118,74 @@ function showProfileView() {
     if (user) {
         const fullName = user.first_name + (user.last_name ? ' ' + user.last_name : '');
         if (profileNameElem) profileNameElem.innerText = fullName;
-
         if (user.photo_url) {
-            if (profileImgElem) profileImgElem.src = user.photo_url;
-        } else if (profileImgElem) {
+            profileImgElem.src = user.photo_url;
+        } else {
             profileImgElem.src = `https://via.placeholder.com/150/4CAF50/ffffff?text=${encodeURIComponent(user.first_name[0])}`;
         }
     } else {
-        if (profileNameElem) profileNameElem.innerText = 'Guest';
-        if (profileImgElem) profileImgElem.src = 'user.png';
+        profileNameElem.innerText = 'Guest';
+        profileImgElem.src = 'user.png';
     }
 
     document.getElementById('game-list-view').style.display = 'none';
     document.getElementById('game-detail-view').style.display = 'none';
-    document.getElementById('flappy-frame').style.display = 'none';
+    document.getElementById('flappy-container').style.display = 'none';
     document.getElementById('profile-view').style.display = 'block';
 }
+
+/* ====== Firebase Integration ====== */
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
+import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
+
+const firebaseConfig = {
+    apiKey: "AIzaSyCU34AXm29TLwmag5hf6hymFztK2ciW2HI",
+    authDomain: "arcadium-test-297c0.firebaseapp.com",
+    databaseURL: "https://arcadium-test-297c0-default-rtdb.firebaseio.com",
+    projectId: "arcadium-test-297c0",
+    storageBucket: "arcadium-test-297c0.firebasestorage.app",
+    messagingSenderId: "1007954059983",
+    appId: "1:1007954059983:web:a1c09597d4cfddf010cdba",
+    measurementId: "G-F6C4GLX7Q5"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+async function saveScore(gameName, score) {
+    const user = window.Telegram?.WebApp?.initDataUnsafe?.user;
+    const userId = user?.id || 'Guest';
+
+    try {
+        await addDoc(collection(db, "scores"), {
+            userId: userId,
+            game: gameName,
+            score: score,
+            timestamp: serverTimestamp()
+        });
+        console.log("Score saved to Firebase!");
+    } catch (err) {
+        console.error("Error saving score:", err);
+    }
+}
+
+async function logEventCustom(eventName, details) {
+    const user = window.Telegram?.WebApp?.initDataUnsafe?.user;
+    const userId = user?.id || 'Guest';
+
+    try {
+        await addDoc(collection(db, "logs"), {
+            userId: userId,
+            event: eventName,
+            details: details,
+            timestamp: serverTimestamp()
+        });
+        console.log("Event logged to Firebase!");
+    } catch (err) {
+        console.error("Error logging event:", err);
+    }
+}
+
+// Example usage:
+// saveScore('Flappy Bird', 100);
+// logEventCustom('GameOver', { reason: 'hit_pipe', score: 100 });
