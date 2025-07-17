@@ -88,16 +88,24 @@ function playGame() {
 // Show profile view and populate Telegram user info
 function showProfileView() {
     const tg = window.Telegram?.WebApp;
+    tg?.expand?.();
     const user = tg?.initDataUnsafe?.user;
 
+    const profileNameElem = document.getElementById('userName');
+    const profileImgElem = document.getElementById('profilePic');
+
     if (user) {
-        document.getElementById('userName').innerText = user.first_name + (user.last_name ? ' ' + user.last_name : '');
-        document.getElementById('profilePic').src = user.photo_url 
-            ? user.photo_url 
-            : `https://via.placeholder.com/150/4CAF50/ffffff?text=${encodeURIComponent(user.first_name[0])}`;
+        const fullName = user.first_name + (user.last_name ? ' ' + user.last_name : '');
+        if (profileNameElem) profileNameElem.innerText = fullName;
+
+        if (user.photo_url) {
+            if (profileImgElem) profileImgElem.src = user.photo_url;
+        } else if (profileImgElem) {
+            profileImgElem.src = `https://via.placeholder.com/150/4CAF50/ffffff?text=${encodeURIComponent(user.first_name[0])}`;
+        }
     } else {
-        document.getElementById('userName').innerText = 'Guest';
-        document.getElementById('profilePic').src = 'user.png';
+        if (profileNameElem) profileNameElem.innerText = 'Guest';
+        if (profileImgElem) profileImgElem.src = 'user.png';
     }
 
     document.getElementById('game-list-view').style.display = 'none';
