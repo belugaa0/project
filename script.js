@@ -76,3 +76,15 @@ function playGame() {
     alert('Launching game...'); 
     // Replace with actual game loading mechanism
 }
+
+function showProfileView() {
+    document.getElementById('game-list-view').style.display = 'none';
+    document.getElementById('game-detail-view').style.display = 'none';
+    document.getElementById('profile-view').style.display = 'block';
+}
+
+function showGameList() {
+    document.getElementById('game-list-view').style.display = 'grid';
+    document.getElementById('game-detail-view').style.display = 'none';
+    document.getElementById('profile-view').style.display = 'none';
+}

@@ -6,6 +6,7 @@ body {
     padding: 0;
 }
 
+/* Navbar */
 .navbar {
     width: 100vw;
     display: flex;
@@ -49,6 +50,7 @@ body {
     border-radius: 50%;
     object-fit: cover;
     border: 0.3vh solid gold;
+    cursor: pointer;
 }
 
 .username {
@@ -56,7 +58,7 @@ body {
     color: gold;
 }
 
-/* Main content */
+/* Game Section */
 .main {
     display: flex;
     flex-direction: column;
@@ -170,4 +172,64 @@ h1 {
 .back-button {
     background-color: grey;
     color: white;
+}
+
+/* Profile View */
+.backBtn {
+    background-color: black;
+    border: none;
+    border-radius: 50%;
+    height: 50px;
+    width: 50px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    margin: 2vh;
+}
+
+.backBtn i {
+    color: white;
+    font-size: 30px;
+}
+
+.profileContainer {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.profileContainer img {
+    width: 140px;
+    height: 140px;
+}
+
+.balanceContainer {
+    width: 150px;
+    height: 100px;
+    margin: 50px auto;
+    border: 1px solid gold;
+    border-radius: 15px;
+}
+
+.coinBox, .tonBox {
+    display: flex;
+    justify-content: space-around;
+}
+
+.wallet {
+    margin: auto;
+    width: 300px;
+    height: 35px;
+}
+
+.walletBtn {
+    width: 300px;
+    height: 40px;
+    border: none;
+    border-radius: 40px;
+    background-color: rgb(34, 126, 183);
+    color: white;
+    cursor: pointer;
 }
