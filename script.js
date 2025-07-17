@@ -1,23 +1,23 @@
 const gameData = {
     'Flappy Bird': {
-        image: 'baldal.jpg',
+        image: 'Flappy_Bird.png',
         intro: 'Fly the bird between pipes without hitting them!',
-        gallery: ['baldal.jpg', 'baldal.jpg', 'baldal.jpg', 'baldal.jpg', 'baldal.jpg']
+        gallery: ['Flappy_Bird.png', 'Flappy_Bird.png', 'Flappy_Bird.png', 'Flappy_Bird.png', 'Flappy_Bird.png']
     },
     'Space Invaders': {
-        image: 'baldal.jpg',
+        image: 'Flappy_Bird.png',
         intro: 'Defend against waves of alien invaders!',
-        gallery: ['baldal.jpg', 'baldal.jpg', 'baldal.jpg', 'baldal.jpg', 'baldal.jpg']
+        gallery: ['Flappy_Bird.png', 'Flappy_Bird.png', 'Flappy_Bird.png', 'Flappy_Bird.png', 'Flappy_Bird.png']
     },
     'Snake': {
-        image: 'baldal.jpg',
+        image: 'Flappy_Bird.png',
         intro: 'Eat food to grow the snake, but don’t hit yourself!',
-        gallery: ['baldal.jpg', 'baldal.jpg', 'baldal.jpg', 'baldal.jpg', 'baldal.jpg']
+        gallery: ['Flappy_Bird.png', 'Flappy_Bird.png', 'Flappy_Bird.png', 'Flappy_Bird.png', 'Flappy_Bird.png']
     },
     'Tetris': {
-        image: 'baldal.jpg',
+        image: 'Flappy_Bird.png',
         intro: 'Fit falling blocks together to clear lines.',
-        gallery: ['baldal.jpg', 'baldal.jpg', 'baldal.jpg', 'baldal.jpg', 'baldal.jpg']
+        gallery: ['Flappy_Bird.png', 'Flappy_Bird.png', 'Flappy_Bird.png', 'Flappy_Bird.png', 'Flappy_Bird.png']
     }
 };
 
