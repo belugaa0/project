@@ -1,0 +1,113 @@
+<!-- flappy-arcadium/index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arcadium Bird</title>
+    <style>
+        canvas { background: skyblue; display: block; margin: 0 auto; }
+        body { margin:0; }
+    </style>
+</head>
+<body>
+<canvas id="gameCanvas" width="320" height="480"></canvas>
+
+<script>
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+
+let bird = { x: 50, y: 150, width: 20, height: 20, gravity: 0.6, lift: -10, velocity: 0 };
+let pipes = [];
+let frameCount = 0;
+let score = 0;
+let gameOver = false;
+
+// Control
+document.addEventListener('keydown', () => bird.velocity = bird.lift);
+canvas.addEventListener('click', () => bird.velocity = bird.lift);
+
+function drawBird() {
+    ctx.fillStyle = 'yellow';
+    ctx.fillRect(bird.x, bird.y, bird.width, bird.height);
+}
+
+function updateBird() {
+    bird.velocity += bird.gravity;
+    bird.y += bird.velocity;
+
+    if (bird.y + bird.height > canvas.height) {
+        bird.y = canvas.height - bird.height;
+        gameOver = true;
+    }
+}
+
+function createPipe() {
+    const gap = 100;
+    const topHeight = Math.random() * (canvas.height - gap - 50);
+    pipes.push({ x: canvas.width, top: topHeight, bottom: topHeight + gap, width: 40 });
+}
+
+function drawPipes() {
+    ctx.fillStyle = 'green';
+    pipes.forEach(pipe => {
+        ctx.fillRect(pipe.x, 0, pipe.width, pipe.top);
+        ctx.fillRect(pipe.x, pipe.bottom, pipe.width, canvas.height - pipe.bottom);
+    });
+}
+
+function updatePipes() {
+    pipes.forEach(pipe => {
+        pipe.x -= 2;
+
+        // Collision
+        if (bird.x < pipe.x + pipe.width && bird.x + bird.width > pipe.x &&
+            (bird.y < pipe.top || bird.y + bird.height > pipe.bottom)) {
+            gameOver = true;
+        }
+
+        if (!pipe.passed && pipe.x + pipe.width < bird.x) {
+            score++;
+            pipe.passed = true;
+        }
+    });
+
+    pipes = pipes.filter(pipe => pipe.x + pipe.width > 0);
+}
+
+function drawScore() {
+    ctx.fillStyle = 'white';
+    ctx.font = '20px Arial';
+    ctx.fillText('Score: ' + score, 10, 30);
+}
+
+function gameLoop() {
+    if (gameOver) {
+        ctx.fillStyle = 'black';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = 'white';
+        ctx.font = '30px Arial';
+        ctx.fillText('Game Over', 80, 200);
+        ctx.fillText('Score: ' + score, 110, 240);
+        return;
+    }
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    drawBird();
+    drawPipes();
+    drawScore();
+
+    updateBird();
+
+    if (frameCount % 100 === 0) createPipe();
+    updatePipes();
+
+    frameCount++;
+    requestAnimationFrame(gameLoop);
+}
+
+gameLoop();
+</script>
+</body>
+</html>

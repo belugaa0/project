@@ -71,6 +71,7 @@ function showGameDetail(gameName) {
     document.getElementById('game-list-view').style.display = 'none';
     document.getElementById('game-detail-view').style.display = 'flex';
     document.getElementById('profile-view').style.display = 'none';
+    document.getElementById('flappy-frame').style.display = 'none';
 }
 
 // Return to game list
@@ -78,11 +79,29 @@ function showGameList() {
     document.getElementById('game-list-view').style.display = 'grid';
     document.getElementById('game-detail-view').style.display = 'none';
     document.getElementById('profile-view').style.display = 'none';
+    document.getElementById('flappy-frame').style.display = 'none';
 }
 
-// Play game (dummy function)
+// Play game
 function playGame() {
-    alert('Launching game...');
+    const selectedGame = document.getElementById('game-detail-title').textContent;
+
+    if (selectedGame === 'Flappy Bird') {
+        launchFlappyArcadium();
+    } else {
+        alert('Launching ' + selectedGame + '... (Coming Soon)');
+    }
+}
+
+// Launch Arcadium Bird
+function launchFlappyArcadium() {
+    document.getElementById('game-list-view').style.display = 'none';
+    document.getElementById('game-detail-view').style.display = 'none';
+    document.getElementById('profile-view').style.display = 'none';
+
+    const frame = document.getElementById('flappy-frame');
+    frame.src = 'flappy.html';
+    frame.style.display = 'block';
 }
 
 // Show profile view and populate Telegram user info
@@ -110,6 +129,6 @@ function showProfileView() {
 
     document.getElementById('game-list-view').style.display = 'none';
     document.getElementById('game-detail-view').style.display = 'none';
+    document.getElementById('flappy-frame').style.display = 'none';
     document.getElementById('profile-view').style.display = 'block';
-    
 }
