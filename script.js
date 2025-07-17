@@ -1,3 +1,26 @@
+document.addEventListener("DOMContentLoaded", function () {
+    const tg = window.Telegram?.WebApp;
+    tg?.expand();
+
+    const user = tg?.initDataUnsafe?.user;
+    const usernameElem = document.getElementById("username");
+    const profilePic = document.getElementById("profile-pic");
+
+    if (user) {
+        const fullName = user.first_name + (user.last_name ? " " + user.last_name : "");
+        if (usernameElem) usernameElem.innerText = fullName;
+
+        if (user.photo_url) {
+            if (profilePic) profilePic.src = user.photo_url;
+        } else if (profilePic) {
+            profilePic.src = "https://via.placeholder.com/150/4CAF50/ffffff?text=" + encodeURIComponent(user.first_name[0]);
+        }
+    } else if (usernameElem) {
+        usernameElem.innerText = "Guest";
+    }
+});
+
+
 const gameData = {
     'Flappy Bird': {
         image: 'Flappy_Bird.png',
@@ -34,14 +57,15 @@ function showGameDetail(gameName) {
     data.gallery.forEach(img => {
         const imgEl = document.createElement('img');
         imgEl.src = img;
+        imgEl.alt = `${gameName} screenshot`;
         imgEl.className = 'gallery-img';
-        imgEl.height = 125;
         gallery.appendChild(imgEl);
     });
 
     document.getElementById('game-list-view').style.display = 'none';
     document.getElementById('game-detail-view').style.display = 'flex';
 }
+
 
 function showGameList() {
     document.getElementById('game-list-view').style.display = 'grid';

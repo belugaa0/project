@@ -13,7 +13,10 @@
       <img src="logo1.jpg" alt="Arcadium Logo"/>
       <div class="profile">
         <p class="balance">0.00</p>
-        <a href="#"><img src="user.png" alt="User"/></a>
+        <div class="telegram-profile">
+          <img id="profile-pic" class="profile-pic" src="user.png" alt="Profile Picture"/>
+          <p id="username" class="username">Guest</p>
+        </div>
       </div>
     </div>
 
@@ -55,13 +58,10 @@
       </div>
 
       <div class="game-gallery" id="game-detail-gallery"></div>
+
       <div class="buttons">
-      <div class="play-button">
-      <button onclick="playGame()">Play</button>
-      </div>  
-      <div class="back-button">
-      <button onclick="showGameList()">Back</button>
-      </div>
+        <button class="play-button" onclick="playGame()">Play</button>
+        <button class="back-button" onclick="showGameList()">Back</button>
       </div>
     </div>
 

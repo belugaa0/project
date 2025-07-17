@@ -11,7 +11,7 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 2vh 3vw;
+    padding: 1vh 3vw;
     background-color: #1a1a1a;
 }
 
@@ -22,7 +22,7 @@ body {
 
 .profile {
     display: flex;
-    gap: 2vw;
+    gap: 1.5vw;
     align-items: center;
 }
 
@@ -34,9 +34,29 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    font-size: 1.8vw;
+    font-size: 1.5vw;
 }
 
+.telegram-profile {
+    display: flex;
+    align-items: center;
+    gap: 0.8vw;
+}
+
+.profile-pic {
+    width: 5vh;
+    height: 5vh;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 0.3vh solid gold;
+}
+
+.username {
+    font-size: 1.5vw;
+    color: gold;
+}
+
+/* Main content */
 .main {
     display: flex;
     flex-direction: column;
@@ -45,7 +65,7 @@ body {
 
 h1 {
     margin: 3vh 0 2vh;
-    font-size: 3.5vw;
+    font-size: 3vw;
 }
 
 .game-container {
@@ -79,7 +99,14 @@ h1 {
 .game-box p {
     margin: 1vh 0;
     font-weight: bold;
-    font-size: 1.8vw;
+    font-size: 1.5vw;
+}
+
+#game-detail-view {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
 }
 
 .game-image img {
@@ -92,13 +119,13 @@ h1 {
 
 .game-name h1 {
     margin: 2vh 0;
-    font-size: 3vw;
+    font-size: 2.8vw;
 }
 
 .game-intro {
     width: 85vw;
     margin: 2vh 0;
-    font-size: 1.8vw;
+    font-size: 1.5vw;
     text-align: center;
 }
 
@@ -115,6 +142,7 @@ h1 {
     border: 0.3vh solid gold;
     height: 12vh;
 }
+
 .buttons {
     display: flex;
     justify-content: space-evenly;
@@ -124,29 +152,22 @@ h1 {
     left: 0;
 }
 
-.play-button button, .back-button button {
+.play-button, .back-button {
     height: 6vh;
     width: 20vw;
     border-radius: 2vw;
-    font-size: 2vw;
+    font-size: 1.5vw;
     border: none;
     cursor: pointer;
     font-weight: bold;
 }
 
-.play-button button {
+.play-button {
     background-color: gold;
     color: black;
 }
 
-.back-button button {
+.back-button {
     background-color: grey;
     color: white;
-}
-
-
-#game-detail-view {
-    flex-direction: column;
-    align-items: center;
-    width: 100%;
 }
