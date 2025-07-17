@@ -8,6 +8,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 function updateNavbarProfile(user) {
     const profilePic = document.getElementById("profile-pic");
+    const usernameElem = document.getElementById("username");
 
     if (user) {
         const fullName = user.first_name + (user.last_name ? " " + user.last_name : "");
@@ -134,10 +135,7 @@ function showProfileView() {
     document.getElementById('profile-view').style.display = 'block';
 }
 
-/* ====== Firebase Integration ====== */
-import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
-import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
-
+/* ====== Firebase Initialization (No imports required because SDK is loaded via HTML) ====== */
 const firebaseConfig = {
     apiKey: "AIzaSyCU34AXm29TLwmag5hf6hymFztK2ciW2HI",
     authDomain: "arcadium-test-297c0.firebaseapp.com",
@@ -149,43 +147,37 @@ const firebaseConfig = {
     measurementId: "G-F6C4GLX7Q5"
 };
 
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
 
-async function saveScore(gameName, score) {
+function saveScore(gameName, score) {
     const user = window.Telegram?.WebApp?.initDataUnsafe?.user;
     const userId = user?.id || 'Guest';
 
-    try {
-        await addDoc(collection(db, "scores"), {
-            userId: userId,
-            game: gameName,
-            score: score,
-            timestamp: serverTimestamp()
-        });
+    db.collection("scores").add({
+        userId: userId,
+        game: gameName,
+        score: score,
+        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+    }).then(() => {
         console.log("Score saved to Firebase!");
-    } catch (err) {
+    }).catch(err => {
         console.error("Error saving score:", err);
-    }
+    });
 }
 
-async function logEventCustom(eventName, details) {
+function logEventCustom(eventName, details) {
     const user = window.Telegram?.WebApp?.initDataUnsafe?.user;
     const userId = user?.id || 'Guest';
 
-    try {
-        await addDoc(collection(db, "logs"), {
-            userId: userId,
-            event: eventName,
-            details: details,
-            timestamp: serverTimestamp()
-        });
+    db.collection("logs").add({
+        userId: userId,
+        event: eventName,
+        details: details,
+        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+    }).then(() => {
         console.log("Event logged to Firebase!");
-    } catch (err) {
+    }).catch(err => {
         console.error("Error logging event:", err);
-    }
+    });
 }
-
-// Example usage:
-// saveScore('Flappy Bird', 100);
-// logEventCustom('GameOver', { reason: 'hit_pipe', score: 100 });
