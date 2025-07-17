@@ -8,16 +8,14 @@ document.addEventListener("DOMContentLoaded", function () {
 
 function updateNavbarProfile(user) {
     const profilePic = document.getElementById("profile-pic");
-    
 
     if (user) {
-        const fullName = user.first_name + (user.last_name ? " " + user.last_name : "");
-        usernameElem.innerText = fullName;
         profilePic.src = user.photo_url || `https://via.placeholder.com/150/4CAF50/ffffff?text=${encodeURIComponent(user.first_name[0])}`;
     } else {
-        usernameElem.innerText = "Guest";
+        profilePic.src = 'user.png';
     }
 }
+
 
 const gameData = {
     'Flappy Bird': {
