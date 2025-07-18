@@ -242,17 +242,20 @@ function saveScore(gameName, score) {
 }
 
 function logEventCustom(eventName, details) {
-    const user = window.Telegram?.WebApp?.initDataUnsafe?.user;
-    const userId = user?.id || 'Guest';
+  const user = window.Telegram?.WebApp?.initDataUnsafe?.user;
+  const userId = user?.id || 'Guest';
 
-    db.collection("users").doc(String(userId))
-      .collection("logs").add({
-          event: eventName,
-          details: details,
-          timestamp: firebase.firestore.FieldValue.serverTimestamp()
-      }).then(() => {
-          console.log(`Event '${eventName}' logged for user ${userId}`);
-      }).catch(err => {
-          console.error("Error logging event:", err);
-      });
+  // ✅ Serialize details safely
+  const safeDetails = JSON.parse(JSON.stringify(details)); // This strips functions, class instances, etc.
+
+  db.collection("users").doc(String(userId))
+    .collection("logs").add({
+      event: eventName,
+      details: safeDetails, // <- now guaranteed to be a plain object
+      timestamp: firebase.firestore.FieldValue.serverTimestamp()
+    }).then(() => {
+      console.log(`Event '${eventName}' logged for user ${userId}`);
+    }).catch(err => {
+      console.error("Error logging event:", err);
+    });
 }
