@@ -1,42 +1,116 @@
-document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener("DOMContentLoaded", () => {
     const tg = window.Telegram?.WebApp;
     tg?.expand();
 
     const user = tg?.initDataUnsafe?.user;
+    if (!user) return;
+
+    checkIfNewUser(user);
     updateNavbarProfile(user);
+    updateNavbarBalance(user);
 });
 
-// Update navbar profile pic
-function updateNavbarProfile(user) {
-    const profilePic = document.getElementById("profile-pic");
+function checkIfNewUser(user) {
+    const userRef = db.collection("users").doc(String(user.id));
 
-    if (user && profilePic) {
-        profilePic.src = user.photo_url || `https://via.placeholder.com/150/4CAF50/ffffff?text=${encodeURIComponent(user.first_name[0])}`;
-    } else if (profilePic) {
-        profilePic.src = 'user.png';
-    }
+    userRef.get().then(doc => {
+        if (doc.exists) {
+            console.log("Returning user:", doc.data());
+        } else {
+            console.log("New user detected, creating entry with 100 coins...");
+            userRef.set({
+                id: user.id,
+                first_name: user.first_name,
+                last_name: user.last_name || '',
+                username: user.username || '',
+                photo_url: user.photo_url || '',
+                coins: 100,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            }).then(() => {
+                console.log("New user saved with 100 coins.");
+                updateNavbarBalance(user); // Ensure balance shows immediately
+            }).catch(err => console.error("Error saving new user:", err));
+        }
+    }).catch(err => console.error("Error checking user:", err));
 }
 
+function updateNavbarProfile(user) {
+    const profilePic = document.getElementById("profile-pic");
+    if (!profilePic || !user) return;
+
+    profilePic.src = user.photo_url || `https://via.placeholder.com/150/4CAF50/ffffff?text=${encodeURIComponent(user.first_name[0])}`;
+}
+
+function updateNavbarBalance(user) {
+    const navbarBalanceElem = document.querySelector('.balance');
+    if (!navbarBalanceElem || !user) return;
+
+    db.collection("users").doc(String(user.id)).get().then(doc => {
+        if (doc.exists) {
+            const coins = doc.data().coins || 0;
+            navbarBalanceElem.textContent = coins.toFixed(2);
+        }
+    }).catch(err => console.error("Error fetching navbar balance:", err));
+}
+
+function showProfileView() {
+    const tg = window.Telegram?.WebApp;
+    tg?.expand?.();
+    const user = tg?.initDataUnsafe?.user;
+
+    const profileNameElem = document.getElementById('userName');
+    const profileImgElem = document.getElementById('profilePic');
+    const coinBalanceElem = document.getElementById('coinBalance');
+    const navbarBalanceElem = document.querySelector('.balance');
+
+    if (user) {
+        const fullName = user.first_name + (user.last_name ? ' ' + user.last_name : '');
+        if (profileNameElem) profileNameElem.innerText = fullName;
+        if (profileImgElem) {
+            profileImgElem.src = user.photo_url || `https://via.placeholder.com/150/4CAF50/ffffff?text=${encodeURIComponent(user.first_name[0])}`;
+        }
+
+        db.collection("users").doc(String(user.id)).get().then(doc => {
+            if (doc.exists) {
+                const coins = doc.data().coins || 0;
+                if (coinBalanceElem) coinBalanceElem.textContent = coins;
+                if (navbarBalanceElem) navbarBalanceElem.textContent = coins.toFixed(2);
+            }
+        }).catch(err => console.error("Error fetching user data:", err));
+    } else {
+        if (profileNameElem) profileNameElem.innerText = 'Guest';
+        if (profileImgElem) profileImgElem.src = 'user.png';
+        if (coinBalanceElem) coinBalanceElem.textContent = '0';
+        if (navbarBalanceElem) navbarBalanceElem.textContent = '0.00';
+    }
+
+    document.getElementById('game-list-view').style.display = 'none';
+    document.getElementById('game-detail-view').style.display = 'none';
+    document.getElementById('flappy-container').style.display = 'none';
+    document.getElementById('profile-view').style.display = 'block';
+}
+
+// Game Display Logic
 const gameData = {
     'Flappy Bird': {
         image: 'Flappy_Bird.png',
         intro: 'Fly the bird between pipes without hitting them!',
-        gallery: ['Flappy_Bird.png', 'Flappy_Bird.png', 'Flappy_Bird.png', 'Flappy_Bird.png', 'Flappy_Bird.png']
+        gallery: Array(5).fill('Flappy_Bird.png')
     },
     'Space Invaders': {
         image: 'Flappy_Bird.png',
         intro: 'Defend against waves of alien invaders!',
-        gallery: ['Flappy_Bird.png', 'Flappy_Bird.png', 'Flappy_Bird.png', 'Flappy_Bird.png', 'Flappy_Bird.png']
+        gallery: Array(5).fill('Flappy_Bird.png')
     },
     'Snake': {
         image: 'Flappy_Bird.png',
         intro: 'Eat food to grow the snake, but don’t hit yourself!',
-        gallery: ['Flappy_Bird.png', 'Flappy_Bird.png', 'Flappy_Bird.png', 'Flappy_Bird.png', 'Flappy_Bird.png']
+        gallery: Array(5).fill('Flappy_Bird.png')
     },
     'Tetris': {
         image: 'Flappy_Bird.png',
         intro: 'Fit falling blocks together to clear lines.',
-        gallery: ['Flappy_Bird.png', 'Flappy_Bird.png', 'Flappy_Bird.png', 'Flappy_Bird.png', 'Flappy_Bird.png']
+        gallery: Array(5).fill('Flappy_Bird.png')
     }
 };
 
@@ -106,34 +180,7 @@ function backToDetail() {
     showGameDetail('Flappy Bird');
 }
 
-function showProfileView() {
-    const tg = window.Telegram?.WebApp;
-    tg?.expand?.();
-    const user = tg?.initDataUnsafe?.user;
-
-    const profileNameElem = document.getElementById('userName');
-    const profileImgElem = document.getElementById('profilePic');
-
-    if (user) {
-        const fullName = user.first_name + (user.last_name ? ' ' + user.last_name : '');
-        if (profileNameElem) profileNameElem.innerText = fullName;
-        if (user.photo_url) {
-            profileImgElem.src = user.photo_url;
-        } else {
-            profileImgElem.src = `https://via.placeholder.com/150/4CAF50/ffffff?text=${encodeURIComponent(user.first_name[0])}`;
-        }
-    } else {
-        profileNameElem.innerText = 'Guest';
-        profileImgElem.src = 'user.png';
-    }
-
-    document.getElementById('game-list-view').style.display = 'none';
-    document.getElementById('game-detail-view').style.display = 'none';
-    document.getElementById('flappy-container').style.display = 'none';
-    document.getElementById('profile-view').style.display = 'block';
-}
-
-/* ====== Firebase Initialization ====== */
+// Firebase Setup
 const firebaseConfig = {
     apiKey: "AIzaSyCU34AXm29TLwmag5hf6hymFztK2ciW2HI",
     authDomain: "arcadium-test-297c0.firebaseapp.com",
@@ -148,6 +195,7 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
+// Optional Score Saving
 function saveScore(gameName, score) {
     const user = window.Telegram?.WebApp?.initDataUnsafe?.user;
     const userId = user?.id || 'Guest';
@@ -164,6 +212,7 @@ function saveScore(gameName, score) {
     });
 }
 
+// Optional Logging
 function logEventCustom(eventName, details) {
     const user = window.Telegram?.WebApp?.initDataUnsafe?.user;
     const userId = user?.id || 'Guest';
