@@ -198,33 +198,41 @@ const db = firebase.firestore();
 // Optional Score Saving
 function saveScore(gameName, score) {
     const user = window.Telegram?.WebApp?.initDataUnsafe?.user;
-    const userId = user?.id || 'Guest';
+    if (!user) {
+        console.error("User not authenticated.");
+        return;
+    }
 
-    db.collection("scores").add({
-        userId: userId,
-        game: gameName,
+    const userId = String(user.id);
+    const scoresRef = db
+        .collection("users").doc(userId)
+        .collection("games").doc(gameName)
+        .collection("scores");
+
+    scoresRef.add({
         score: score,
         timestamp: firebase.firestore.FieldValue.serverTimestamp()
     }).then(() => {
-        console.log("Score saved to Firebase!");
+        console.log(`Score of ${score} saved for game ${gameName} under user ${userId}`);
     }).catch(err => {
         console.error("Error saving score:", err);
     });
 }
+
 
 // Optional Logging
 function logEventCustom(eventName, details) {
     const user = window.Telegram?.WebApp?.initDataUnsafe?.user;
     const userId = user?.id || 'Guest';
 
-    db.collection("logs").add({
-        userId: userId,
-        event: eventName,
-        details: details,
-        timestamp: firebase.firestore.FieldValue.serverTimestamp()
-    }).then(() => {
-        console.log("Event logged to Firebase!");
-    }).catch(err => {
-        console.error("Error logging event:", err);
-    });
+    db.collection("users").doc(String(userId))
+      .collection("logs").add({
+          event: eventName,
+          details: details,
+          timestamp: firebase.firestore.FieldValue.serverTimestamp()
+      }).then(() => {
+          console.log(`Event '${eventName}' logged for user ${userId}`);
+      }).catch(err => {
+          console.error("Error logging event:", err);
+      });
 }
