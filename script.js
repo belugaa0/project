@@ -10,9 +10,9 @@ document.addEventListener("DOMContentLoaded", () => {
     updateNavbarBalance(user);
 });
 
+// ================= USER PROFILE ===================
 function checkIfNewUser(user) {
     const userRef = db.collection("users").doc(String(user.id));
-
     userRef.get().then(doc => {
         if (doc.exists) {
             console.log("Returning user:", doc.data());
@@ -28,7 +28,7 @@ function checkIfNewUser(user) {
                 createdAt: firebase.firestore.FieldValue.serverTimestamp()
             }).then(() => {
                 console.log("New user saved with 100 coins.");
-                updateNavbarBalance(user); // Ensure balance shows immediately
+                updateNavbarBalance(user);
             }).catch(err => console.error("Error saving new user:", err));
         }
     }).catch(err => console.error("Error checking user:", err));
@@ -37,7 +37,6 @@ function checkIfNewUser(user) {
 function updateNavbarProfile(user) {
     const profilePic = document.getElementById("profile-pic");
     if (!profilePic || !user) return;
-
     profilePic.src = user.photo_url || `https://via.placeholder.com/150/4CAF50/ffffff?text=${encodeURIComponent(user.first_name[0])}`;
 }
 
@@ -90,17 +89,17 @@ function showProfileView() {
     document.getElementById('profile-view').style.display = 'block';
 }
 
-// Game Display Logic
+// ================= GAME DISPLAY ===================
 const gameData = {
     'Flappy Bird': {
         image: 'Flappy_Bird.png',
         intro: 'Fly the bird between pipes without hitting them!',
         gallery: Array(5).fill('Flappy_Bird.png')
     },
-    'Space Invaders': {
-        image: 'Flappy_Bird.png',
-        intro: 'Defend against waves of alien invaders!',
-        gallery: Array(5).fill('Flappy_Bird.png')
+    'Tic Tac Toe': {
+        image: 'tic_tac_toe.png',
+        intro: 'Outsmart the AI in this classic strategy game!',
+        gallery: Array(5).fill('tic_tac_toe.png')
     },
     'Snake': {
         image: 'Flappy_Bird.png',
@@ -145,10 +144,13 @@ function showGameList() {
     document.getElementById('flappy-container').style.display = 'none';
 }
 
+// ================= GAME PLAY ===================
 function playGame() {
     const selectedGame = document.getElementById('game-detail-title').textContent;
     if (selectedGame === 'Flappy Bird') {
         launchFlappyArcadium();
+    } else if (selectedGame === 'Tic Tac Toe') {
+        launchTicTacToe();
     } else {
         alert('Launching ' + selectedGame + '... (Coming Soon)');
     }
@@ -164,7 +166,23 @@ function launchFlappyArcadium() {
         <iframe id="flappy-frame" src="flappy.html" style="width:100%; height:80vh; border:none;"></iframe>
         <div style="margin-top:10px; text-align:center;">
             <button onclick="retryFlappy()">Retry</button>
-            <button onclick="backToDetail()">Back</button>
+            <button onclick="backToDetail('Flappy Bird')">Back</button>
+        </div>
+    `;
+    frameContainer.style.display = 'block';
+}
+
+function launchTicTacToe() {
+    document.getElementById('game-list-view').style.display = 'none';
+    document.getElementById('game-detail-view').style.display = 'none';
+    document.getElementById('profile-view').style.display = 'none';
+
+    const frameContainer = document.getElementById('flappy-container');
+    frameContainer.innerHTML = `
+        <iframe id="tictactoe-frame" src="tictactoe.html" style="width:100%; height:80vh; border:none;"></iframe>
+        <div style="margin-top:10px; text-align:center;">
+            <button onclick="retryTicTacToe()">Retry</button>
+            <button onclick="backToDetail('Tic Tac Toe')">Back</button>
         </div>
     `;
     frameContainer.style.display = 'block';
@@ -175,12 +193,17 @@ function retryFlappy() {
     frame.src = frame.src;
 }
 
-function backToDetail() {
-    document.getElementById('flappy-container').style.display = 'none';
-    showGameDetail('Flappy Bird');
+function retryTicTacToe() {
+    const frame = document.getElementById('tictactoe-frame');
+    frame.src = frame.src;
 }
 
-// Firebase Setup
+function backToDetail(gameName = 'Flappy Bird') {
+    document.getElementById('flappy-container').style.display = 'none';
+    showGameDetail(gameName);
+}
+
+// ================= FIREBASE ===================
 const firebaseConfig = {
     apiKey: "AIzaSyCU34AXm29TLwmag5hf6hymFztK2ciW2HI",
     authDomain: "arcadium-test-297c0.firebaseapp.com",
@@ -195,7 +218,6 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
-// Optional Score Saving
 function saveScore(gameName, score) {
     const user = window.Telegram?.WebApp?.initDataUnsafe?.user;
     if (!user) {
@@ -219,8 +241,6 @@ function saveScore(gameName, score) {
     });
 }
 
-
-// Optional Logging
 function logEventCustom(eventName, details) {
     const user = window.Telegram?.WebApp?.initDataUnsafe?.user;
     const userId = user?.id || 'Guest';
