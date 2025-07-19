@@ -8,7 +8,9 @@ document.addEventListener("DOMContentLoaded", () => {
     checkIfNewUser(user);
     updateNavbarProfile(user);
     updateNavbarBalance(user);
+    setupWalletButton(user); // ✅ Required for wallet connect to work
 });
+
 
 // ================= USER PROFILE ===================
 function checkIfNewUser(user) {
@@ -245,13 +247,12 @@ function logEventCustom(eventName, details) {
   const user = window.Telegram?.WebApp?.initDataUnsafe?.user;
   const userId = user?.id || 'Guest';
 
-  // ✅ Serialize details safely
-  const safeDetails = JSON.parse(JSON.stringify(details)); // This strips functions, class instances, etc.
+  const safeDetails = JSON.parse(JSON.stringify(details));
 
   db.collection("users").doc(String(userId))
     .collection("logs").add({
       event: eventName,
-      details: safeDetails, // <- now guaranteed to be a plain object
+      details: safeDetails,
       timestamp: firebase.firestore.FieldValue.serverTimestamp()
     }).then(() => {
       console.log(`Event '${eventName}' logged for user ${userId}`);
@@ -261,40 +262,46 @@ function logEventCustom(eventName, details) {
 }
 
 // =============== TON CONNECT SETUP ================
-// --- TonConnect Init ---
-const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
-  manifestUrl: "https://belugaa0.github.io/project/tonconnect-manifest.json",
-  buttonRootId: "", // We’re manually attaching the click handler
-});
+function setupWalletButton(user) {
+  const walletBtn = document.querySelector(".walletBtn");
 
-// --- Handle Wallet Connect Button ---
-document.querySelector(".walletBtn").addEventListener("click", async () => {
+  const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
+    manifestUrl: "https://belugaa0.github.io/project/tonconnect-manifest.json",
+    buttonRootId: "", // We are not using the default widget UI
+  });
+
+  walletBtn.addEventListener("click", async () => {
+    await tonConnectUI.connectWallet();
+    const connectedWallet = tonConnectUI.connected;
+
+    if (connectedWallet?.account?.address) {
+      const walletAddress = connectedWallet.account.address;
+      walletBtn.textContent = `Connected: ${walletAddress.slice(0, 4)}...${walletAddress.slice(-4)}`;
+
+      // Save wallet address to Firestore
+      if (user) {
+        const userRef = db.collection("users").doc(String(user.id));
+        await userRef.set({ walletAddress }, { merge: true });
+      }
+
+      // Optional: Fetch TON balance (testnet)
+      const balance = await fetchTonBalance(walletAddress);
+      if (!isNaN(balance)) {
+        const userRef = db.collection("users").doc(String(user.id));
+        await userRef.set({ ton: balance }, { merge: true });
+        document.getElementById("tonBalance").textContent = balance;
+      }
+    }
+  });
+}
+
+async function fetchTonBalance(walletAddress) {
   try {
-    const wallet = await tonConnectUI.connectWallet();
-
-    if (!wallet || !wallet.account?.address) {
-      alert("Wallet not connected.");
-      return;
-    }
-
-    const walletAddress = wallet.account.address;
-
-    // Update button UI
-    const btn = document.querySelector(".walletBtn");
-    btn.innerText = `Connected: ${walletAddress.slice(0, 6)}...${walletAddress.slice(-4)}`;
-    btn.disabled = true;
-
-    // Fetch TON balance
-    const res = await fetch(`https://testnet.tonapi.io/v2/accounts/${walletAddress}`);
+    const res = await fetch(`https://tonapi.io/v2/accounts/${walletAddress}`);
     const data = await res.json();
-    const tonBalance = data.balance / 1e9;
-
-    const balanceEl = document.getElementById("tonBalance");
-    if (balanceEl) {
-      balanceEl.innerText = `${tonBalance.toFixed(4)} TON`;
-    }
-  } catch (err) {
-    console.error("TonConnect Error:", err);
-    alert("Failed to connect wallet.");
+    return (data.balance || 0) / 1e9; // Convert from nanoTON
+  } catch (e) {
+    console.error("Failed to fetch TON balance:", e);
+    return 0;
   }
-});
+}
