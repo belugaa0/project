@@ -1,7 +1,11 @@
 {
-  "url": "https://belugaa0.github.io/project/",
+  "manifest_version": "0.1.0",
   "name": "ArcadiumX",
+  "description": "TON wallet integration for ArcadiumX",
+  "url": "https://belugaa0.github.io/project/",
   "iconUrl": "https://belugaa0.github.io/project/logo1.jpg",
-  "network": "testnet",
-  "permissions": ["tonClient", "accountInteraction"]
+  "bridge": {
+    "type": "ton-x"
+  },
+  "network": "testnet"
 }

@@ -270,31 +270,28 @@ const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
 // --- Handle Wallet Connect Button ---
 document.querySelector(".walletBtn").addEventListener("click", async () => {
   try {
-    await tonConnectUI.connectWallet();
-    const wallet = tonConnectUI.connectedWallet;
+    const wallet = await tonConnectUI.connectWallet();
 
-    if (wallet?.account?.address) {
-      const walletAddress = wallet.account.address;
-
-      // Update button text
-      const btn = document.querySelector(".walletBtn");
-      btn.innerText = `Connected: ${walletAddress.slice(0, 6)}...${walletAddress.slice(-4)}`;
-      btn.disabled = true;
-
-      // Fetch balance from TON API
-      const res = await fetch(`https://testnet.tonapi.io/v2/accounts/${walletAddress}`);
-      const data = await res.json();
-      const tonBalance = data.balance / 1e9;
-
-      // Show balance if there's an element to show it
-      const balanceEl = document.getElementById("tonBalance");
-      if (balanceEl) {
-        balanceEl.innerText = `${tonBalance.toFixed(4)} TON`;
-      } else {
-        console.log("Balance:", tonBalance.toFixed(4), "TON");
-      }
-    } else {
+    if (!wallet || !wallet.account?.address) {
       alert("Wallet not connected.");
+      return;
+    }
+
+    const walletAddress = wallet.account.address;
+
+    // Update button UI
+    const btn = document.querySelector(".walletBtn");
+    btn.innerText = `Connected: ${walletAddress.slice(0, 6)}...${walletAddress.slice(-4)}`;
+    btn.disabled = true;
+
+    // Fetch TON balance
+    const res = await fetch(`https://testnet.tonapi.io/v2/accounts/${walletAddress}`);
+    const data = await res.json();
+    const tonBalance = data.balance / 1e9;
+
+    const balanceEl = document.getElementById("tonBalance");
+    if (balanceEl) {
+      balanceEl.innerText = `${tonBalance.toFixed(4)} TON`;
     }
   } catch (err) {
     console.error("TonConnect Error:", err);
