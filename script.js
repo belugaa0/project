@@ -259,3 +259,45 @@ function logEventCustom(eventName, details) {
       console.error("Error logging event:", err);
     });
 }
+
+// =============== TON CONNECT SETUP ================
+const tonConnect = new TonConnect({
+  manifestUrl: "https://arcadiumx.vercel.app/tonconnect-manifest.json" // update if hosted elsewhere
+});
+
+const walletBtn = document.querySelector('.walletBtn');
+
+// On click, connect wallet
+walletBtn?.addEventListener('click', async () => {
+  try {
+    await tonConnect.connect();
+    const wallet = tonConnect.wallet;
+
+    if (wallet?.account?.address) {
+      alert("Connected to wallet:\n" + wallet.account.address);
+      document.getElementById('tonBalance').textContent = 'Fetching...';
+      fetchTonBalance(wallet.account.address);
+    }
+  } catch (e) {
+    console.error("TON Connect error:", e);
+    alert("Failed to connect to wallet.");
+  }
+});
+
+// Fetch TON balance from TonAPI testnet
+async function fetchTonBalance(address) {
+  try {
+    const response = await fetch(`https://testnet.tonapi.io/v2/accounts/${address}`);
+    const data = await response.json();
+
+    if (data.balance) {
+      const ton = data.balance / 1e9;
+      document.getElementById('tonBalance').textContent = ton.toFixed(2);
+    } else {
+      document.getElementById('tonBalance').textContent = '0';
+    }
+  } catch (error) {
+    console.error("Failed to fetch TON balance:", error);
+    document.getElementById('tonBalance').textContent = 'Error';
+  }
+}
