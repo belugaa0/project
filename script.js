@@ -261,43 +261,43 @@ function logEventCustom(eventName, details) {
 }
 
 // =============== TON CONNECT SETUP ================
-const tonConnect = new TonConnect({
-  manifestUrl: "https://arcadiumx.vercel.app/tonconnect-manifest.json" // update if hosted elsewhere
+// --- TonConnect Init ---
+const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
+  manifestUrl: "https://belugaa0.github.io/project/tonconnect-manifest.json",
+  buttonRootId: "", // We’re manually attaching the click handler
 });
 
-const walletBtn = document.querySelector('.walletBtn');
-
-// On click, connect wallet
-walletBtn?.addEventListener('click', async () => {
+// --- Handle Wallet Connect Button ---
+document.querySelector(".walletBtn").addEventListener("click", async () => {
   try {
-    await tonConnect.connect();
-    const wallet = tonConnect.wallet;
+    await tonConnectUI.connectWallet();
+    const wallet = tonConnectUI.connectedWallet;
 
     if (wallet?.account?.address) {
-      alert("Connected to wallet:\n" + wallet.account.address);
-      document.getElementById('tonBalance').textContent = 'Fetching...';
-      fetchTonBalance(wallet.account.address);
+      const walletAddress = wallet.account.address;
+
+      // Update button text
+      const btn = document.querySelector(".walletBtn");
+      btn.innerText = `Connected: ${walletAddress.slice(0, 6)}...${walletAddress.slice(-4)}`;
+      btn.disabled = true;
+
+      // Fetch balance from TON API
+      const res = await fetch(`https://testnet.tonapi.io/v2/accounts/${walletAddress}`);
+      const data = await res.json();
+      const tonBalance = data.balance / 1e9;
+
+      // Show balance if there's an element to show it
+      const balanceEl = document.getElementById("tonBalance");
+      if (balanceEl) {
+        balanceEl.innerText = `${tonBalance.toFixed(4)} TON`;
+      } else {
+        console.log("Balance:", tonBalance.toFixed(4), "TON");
+      }
+    } else {
+      alert("Wallet not connected.");
     }
-  } catch (e) {
-    console.error("TON Connect error:", e);
-    alert("Failed to connect to wallet.");
+  } catch (err) {
+    console.error("TonConnect Error:", err);
+    alert("Failed to connect wallet.");
   }
 });
-
-// Fetch TON balance from TonAPI testnet
-async function fetchTonBalance(address) {
-  try {
-    const response = await fetch(`https://testnet.tonapi.io/v2/accounts/${address}`);
-    const data = await response.json();
-
-    if (data.balance) {
-      const ton = data.balance / 1e9;
-      document.getElementById('tonBalance').textContent = ton.toFixed(2);
-    } else {
-      document.getElementById('tonBalance').textContent = '0';
-    }
-  } catch (error) {
-    console.error("Failed to fetch TON balance:", error);
-    document.getElementById('tonBalance').textContent = 'Error';
-  }
-}

@@ -2,6 +2,6 @@
   "url": "https://belugaa0.github.io/project/",
   "name": "ArcadiumX",
   "iconUrl": "https://belugaa0.github.io/project/logo1.jpg",
-  "termsOfUseUrl": "https://belugaa0.github.io/project/terms.html",
-  "privacyPolicyUrl": "https://belugaa0.github.io/project/privacy.html"
+  "network": "testnet",
+  "permissions": ["tonClient", "accountInteraction"]
 }
