@@ -90,13 +90,9 @@ function gameLoop() {
     ctx.fillText('Game Over', 80, 200);
     ctx.fillText('Score: ' + score, 110, 240);
 
-    // Send score to parent for saving
-    if (window.parent && window.parent.saveScore) {
-        window.parent.saveScore('Flappy Bird', score);
-    }
-    if (window.parent && window.parent.logEventCustom) {
-        window.parent.logEventCustom('GameOver', { game: 'Flappy Bird', score: score, reason: 'hit_pipe' });
-    }
+    // Post score to parent window
+    window.parent.postMessage({ type: 'flappyScore', score: score }, '*');
+
     return;
 }
 

@@ -238,10 +238,35 @@ function saveScore(gameName, score) {
         timestamp: firebase.firestore.FieldValue.serverTimestamp()
     }).then(() => {
         console.log(`Score of ${score} saved for game ${gameName} under user ${userId}`);
+
+        // Reward system
+        let reward = 0;
+        if (gameName === "Flappy Bird") {
+            reward = score * 0.25;
+        } else if (gameName === "Tic Tac Toe" && score === 1) {
+            reward = 0.75; // Only reward on human win
+        }
+
+        if (reward > 0) {
+            const userRef = db.collection("users").doc(userId);
+            userRef.get().then(doc => {
+                if (doc.exists) {
+                    const oldCoins = doc.data().coins || 0;
+                    const newCoins = oldCoins + reward;
+
+                    userRef.update({ coins: newCoins }).then(() => {
+                        console.log(`User rewarded with ${reward} coins. New balance: ${newCoins}`);
+                        updateNavbarBalance(user); // refresh displayed balance
+                    });
+                }
+            });
+        }
+
     }).catch(err => {
         console.error("Error saving score:", err);
     });
 }
+
 
 function logEventCustom(eventName, details) {
   const user = window.Telegram?.WebApp?.initDataUnsafe?.user;
@@ -305,3 +330,47 @@ async function fetchTonBalance(walletAddress) {
     return 0;
   }
 }
+
+// ================= FLAPPY BIRD SCORE REWARD ===================
+window.addEventListener("message", async (event) => {
+    const { type, score } = event.data;
+    if (type === "flappyScore") {
+        const user = window.Telegram?.WebApp?.initDataUnsafe?.user;
+        if (!user) return;
+
+        const userId = String(user.id);
+        const userRef = db.collection("users").doc(userId);
+        const scoresRef = userRef.collection("games").doc("Flappy Bird").collection("scores");
+
+        // Save the score
+        await scoresRef.add({
+            score: score,
+            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        });
+
+        console.log("Saved Flappy Bird score:", score);
+
+        // Reward: 0.25 coins per score point
+        const earnedCoins = parseFloat((score * 0.25).toFixed(2));
+        if (earnedCoins > 0) {
+            await db.runTransaction(async (tx) => {
+                const userSnap = await tx.get(userRef);
+                if (!userSnap.exists) return;
+
+                const prev = userSnap.data().coins || 0;
+                const newTotal = parseFloat((prev + earnedCoins).toFixed(2));
+                tx.update(userRef, { coins: newTotal });
+            });
+
+            console.log(`+${earnedCoins} coins rewarded`);
+
+            // Refresh balance in navbar and profile view
+            updateNavbarBalance(user);
+            const profileCoins = document.getElementById("coinBalance");
+            if (profileCoins) {
+                const newVal = parseFloat(profileCoins.textContent || "0") + earnedCoins;
+                profileCoins.textContent = newVal.toFixed(2);
+            }
+        }
+    }
+});
