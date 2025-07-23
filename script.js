@@ -297,13 +297,18 @@ function setupWalletButton(user) {
   const walletBtn = document.querySelector(".walletBtn");
   if (!walletBtn || tonConnectUI) return;
 
-  tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
-    manifestUrl: "https://belugaa0.github.io/project/tonconnect-manifest.json",
-    uiPreferences: {
-      language: "en",
-      theme: "DARK"
+ tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
+  manifestUrl: "https://belugaa0.github.io/project/tonconnect-manifest.json",
+  uiPreferences: {
+    language: "en",
+    theme: "DARK",
+    actionsConfiguration: {
+      returnStrategy: 'back',
+      openedStrategy: 'href', // this is the fix!
     }
-  });
+  }
+});
+
 
   walletBtn.onclick = async () => {
     const isConnected = tonConnectUI.connected?.account?.address;
