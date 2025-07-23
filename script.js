@@ -313,49 +313,42 @@ function initTonConnectUI(user, walletBtn) {
   });
 
   walletBtn.onclick = async () => {
-  const connected = tonConnectUI.connected;
+    const connected = tonConnectUI.connected;
 
-  if (connected?.account?.address) {
-    // 🔌 Attempt full disconnect
-    await tonConnectUI.disconnect();
+    if (connected?.account?.address) {
+      await tonConnectUI.disconnect();
 
-    // 🔄 Clear all storage keys
-    localStorage.removeItem('ton-connect-storage');
-    sessionStorage.clear();
+      localStorage.removeItem('ton-connect-storage');
+      sessionStorage.clear();
 
-    // 🔁 Reset the UI
-    walletBtn.textContent = "Connect to Wallet";
-    document.getElementById("tonBalance").textContent = "0";
+      walletBtn.textContent = "Connect to Wallet";
+      document.getElementById("tonBalance").textContent = "0";
 
-    // 🔄 Re-initialize TonConnectUI with a slight delay
-    setTimeout(() => {
-      initTonConnectUI(user, walletBtn);
-    }, 100);
+      setTimeout(() => {
+        initTonConnectUI(user, walletBtn);
+      }, 100);
 
-    // ❌ Also update Firebase
-    if (user) {
-      const userRef = db.collection("users").doc(String(user.id));
-      await userRef.update({
-        walletAddress: firebase.firestore.FieldValue.delete(),
-        ton: firebase.firestore.FieldValue.delete()
-      });
+      if (user) {
+        const userRef = db.collection("users").doc(String(user.id));
+        await userRef.update({
+          walletAddress: firebase.firestore.FieldValue.delete(),
+          ton: firebase.firestore.FieldValue.delete()
+        });
+      }
+
+      alert("Wallet disconnected. You can now connect a new one.");
+    } else {
+      await tonConnectUI.openModal();
     }
+  };
 
-    alert("Wallet disconnected. You can now connect a new one.");
-  } else {
-    // Show wallet modal
-    await tonConnectUI.openModal();
-  }
-};
-
-
+  // ✅ ✅ ✅ MOVE THIS INSIDE HERE
   tonConnectUI.onStatusChange(async (walletInfo) => {
     if (walletInfo?.account?.address) {
       const walletAddress = walletInfo.account.address;
       const short = `${walletAddress.slice(0, 4)}...${walletAddress.slice(-4)}`;
       walletBtn.textContent = `Disconnect (${short})`;
 
-      // Save to Firebase
       if (user) {
         const userRef = db.collection("users").doc(String(user.id));
         await userRef.set({ walletAddress }, { merge: true });
