@@ -292,77 +292,72 @@ function logEventCustom(eventName, details) {
 // =============== TON CONNECT SETUP ================
 let tonConnectUI;
 
-function setupWalletButton(user) {
+function initTonConnectUI() {
+  if (!tonConnectUI) {
+    tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
+      manifestUrl: "https://belugaa0.github.io/project/tonconnect-manifest.json",
+      buttonRootId: "ton-connect-button-root",
+    });
+  }
+}
+
+
+  function setupWalletButton(user) {
+  initTonConnectUI();
+
   const walletBtn = document.querySelector(".walletBtn");
   if (!walletBtn) return;
 
-  tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
-    manifestUrl: "https://belugaa0.github.io/project/tonconnect-manifest.json",
-    buttonRootId: "ton-connect-button-root"
-  });
-
-  walletBtn.addEventListener("click", async () => {
-    const connected = tonConnectUI.connected;
-
-    if (connected && connected.account?.address) {
-  await tonConnectUI.disconnect();
-  tonConnectUI = null; // Clear old UI instance
-
-  // Reset the button
-  walletBtn.textContent = "Connect to Wallet";
-  document.getElementById("tonBalance").textContent = "0";
-
-  // Remove saved wallet from Firebase
-  if (user) {
-    const userRef = db.collection("users").doc(String(user.id));
-    await userRef.update({
-      walletAddress: firebase.firestore.FieldValue.delete(),
-      ton: firebase.firestore.FieldValue.delete()
-    });
-  }
-
-  // Re-setup a fresh instance on next interaction
-  walletBtn.onclick = () => setupWalletButton(user);
-}
- else {
-      // Show modal (wallet selection with QR or link)
-      await tonConnectUI.openModal();
-    }
-  });
-
-  // Auto update UI if already connected
+  // Update UI on connection status change
   tonConnectUI.onStatusChange(async (walletInfo) => {
     if (walletInfo?.account?.address) {
-      const walletAddress = walletInfo.account.address;
-      walletBtn.textContent = `Disconnect (${walletAddress.slice(0, 4)}...${walletAddress.slice(-4)})`;
+      const address = walletInfo.account.address;
+      const short = `${address.slice(0, 4)}...${address.slice(-4)}`;
+      walletBtn.textContent = `Disconnect (${short})`;
 
-      // Save to Firestore
-      if (user) {
-        const userRef = db.collection("users").doc(String(user.id));
-        await userRef.set({ walletAddress }, { merge: true });
+      // Save to Firebase
+      const userRef = db.collection("users").doc(String(user.id));
+      await userRef.set({ walletAddress: address }, { merge: true });
 
-        const balance = await fetchTonBalance(walletAddress);
-        if (!isNaN(balance)) {
-          await userRef.set({ ton: balance }, { merge: true });
-          document.getElementById("tonBalance").textContent = balance;
-        }
+      const balance = await fetchTonBalance(address);
+      if (!isNaN(balance)) {
+        document.getElementById("tonBalance").textContent = balance;
+        await userRef.set({ ton: balance }, { merge: true });
       }
+    } else {
+      walletBtn.textContent = "Connect to Wallet";
+      document.getElementById("tonBalance").textContent = "0";
     }
   });
+
+  // Add click handler
+  walletBtn.onclick = async () => {
+    try {
+      const connected = tonConnectUI.connected;
+      if (connected?.account?.address) {
+        // Already connected → disconnect
+        await tonConnectUI.disconnect();
+      } else {
+        // Not connected → open modal
+        await tonConnectUI.openModal();
+      }
+    } catch (err) {
+      console.error("TON Connect error:", err);
+    }
+  };
 }
 
 
 async function fetchTonBalance(walletAddress) {
   try {
-    const res = await fetch(`https://tonapi.io/v2/accounts/${walletAddress}`);
+    const res = await fetch(`https://testnet.tonapi.io/v2/accounts/${walletAddress}`);
     const data = await res.json();
-    return (data.balance || 0) / 1e9; // Convert from nanoTON
+    return (data.balance || 0) / 1e9; // nanoTON → TON
   } catch (e) {
-    console.error("Failed to fetch TON balance:", e);
+    console.error("Failed to fetch balance:", e);
     return 0;
   }
 }
-
 
 // ================= FLAPPY BIRD SCORE REWARD ===================
 window.addEventListener("message", async (event) => {
