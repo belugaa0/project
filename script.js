@@ -305,11 +305,26 @@ function setupWalletButton(user) {
     const connected = tonConnectUI.connected;
 
     if (connected && connected.account?.address) {
-      // Already connected — now disconnect
-      await tonConnectUI.disconnect();
-      walletBtn.textContent = "Connect to Wallet";
-      document.getElementById("tonBalance").textContent = "0";
-    } else {
+  await tonConnectUI.disconnect();
+  tonConnectUI = null; // Clear old UI instance
+
+  // Reset the button
+  walletBtn.textContent = "Connect to Wallet";
+  document.getElementById("tonBalance").textContent = "0";
+
+  // Remove saved wallet from Firebase
+  if (user) {
+    const userRef = db.collection("users").doc(String(user.id));
+    await userRef.update({
+      walletAddress: firebase.firestore.FieldValue.delete(),
+      ton: firebase.firestore.FieldValue.delete()
+    });
+  }
+
+  // Re-setup a fresh instance on next interaction
+  walletBtn.onclick = () => setupWalletButton(user);
+}
+ else {
       // Show modal (wallet selection with QR or link)
       await tonConnectUI.openModal();
     }
