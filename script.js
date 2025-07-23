@@ -295,9 +295,8 @@ let connectedWalletAddress = null;
 
 function setupWalletButton(user) {
   const walletBtn = document.querySelector(".walletBtn");
-  if (!walletBtn) return;
+  if (!walletBtn || tonConnectUI) return;
 
-  // ✅ Initialize TonConnectUI
   tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
     manifestUrl: "https://belugaa0.github.io/project/tonconnect-manifest.json",
     uiPreferences: {
@@ -306,34 +305,35 @@ function setupWalletButton(user) {
     }
   });
 
-  // ✅ Update button based on connection
-  updateWalletButtonUI(walletBtn, user);
-
   walletBtn.onclick = async () => {
     const isConnected = tonConnectUI.connected?.account?.address;
 
     if (isConnected) {
-      // ✅ Disconnect
-      tonConnectUI.disconnect();
+      // 🔌 Disconnect wallet
+      await tonConnectUI.disconnect();
       connectedWalletAddress = null;
       walletBtn.textContent = "Connect to Wallet";
       document.getElementById("tonBalance").textContent = "0";
 
-      // ❌ Optional: remove wallet address from Firebase
+      // ❌ Remove wallet from Firebase (optional)
       if (user) {
         const userRef = db.collection("users").doc(String(user.id));
-        await userRef.update({ walletAddress: firebase.firestore.FieldValue.delete(), ton: firebase.firestore.FieldValue.delete() });
+        await userRef.update({
+          walletAddress: firebase.firestore.FieldValue.delete(),
+          ton: firebase.firestore.FieldValue.delete()
+        });
       }
     } else {
-      // ✅ Connect
+      // 🔗 Connect wallet
       await tonConnectUI.connectWallet();
       const wallet = tonConnectUI.connected;
+
       if (wallet?.account?.address) {
         connectedWalletAddress = wallet.account.address;
         const short = `${connectedWalletAddress.slice(0, 4)}...${connectedWalletAddress.slice(-4)}`;
         walletBtn.textContent = `Disconnect (${short})`;
 
-        // ✅ Save to Firebase
+        // Save to Firebase
         if (user) {
           const userRef = db.collection("users").doc(String(user.id));
           await userRef.set({ walletAddress: connectedWalletAddress }, { merge: true });
@@ -350,16 +350,18 @@ function setupWalletButton(user) {
 }
 
 
+
 async function fetchTonBalance(walletAddress) {
   try {
-    const response = await fetch(`https://testnet.tonapi.io/v2/accounts/${walletAddress}`);
-    const data = await response.json();
-    return (data.balance || 0) / 1e9; // Convert from nanoTON to TON
-  } catch (error) {
-    console.error("Error fetching TON balance:", error);
+    const res = await fetch(`https://testnet.tonapi.io/v2/accounts/${walletAddress}`);
+    const data = await res.json();
+    return (data.balance || 0) / 1e9; // Convert from nanoTON
+  } catch (e) {
+    console.error("Failed to fetch TON balance:", e);
     return 0;
   }
 }
+
 
 
 // ================= FLAPPY BIRD SCORE REWARD ===================
