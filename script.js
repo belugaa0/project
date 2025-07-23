@@ -1,14 +1,20 @@
 document.addEventListener("DOMContentLoaded", () => {
-    const tg = window.Telegram?.WebApp;
-    tg?.expand();
+  // Force clear TON Connect cache on load (optional)
+  if (window.Telegram?.WebApp?.initData) {
+    localStorage.removeItem("ton-connect-storage"); // <- helps in TWA sessions
+  }
 
-    const user = tg?.initDataUnsafe?.user;
-    if (!user) return;
+  // Your usual init
+  const tg = window.Telegram?.WebApp;
+  tg?.expand();
 
-    checkIfNewUser(user);
-    updateNavbarProfile(user);
-    updateNavbarBalance(user);
-    setupWalletButton(user); // ✅ Required for wallet connect to work
+  const user = tg?.initDataUnsafe?.user;
+  if (!user) return;
+
+  checkIfNewUser(user);
+  updateNavbarProfile(user);
+  updateNavbarBalance(user);
+  setupWalletButton(user);
 });
 
 
@@ -307,35 +313,41 @@ function initTonConnectUI(user, walletBtn) {
   });
 
   walletBtn.onclick = async () => {
-    const connected = tonConnectUI.connected;
+  const connected = tonConnectUI.connected;
 
-    if (connected?.account?.address) {
-      // Disconnect
-      await tonConnectUI.disconnect();
-      console.log("Disconnected from wallet.");
+  if (connected?.account?.address) {
+    // 🔌 Attempt full disconnect
+    await tonConnectUI.disconnect();
 
-      // Remove from Firebase
-      if (user) {
-        const userRef = db.collection("users").doc(String(user.id));
-        await userRef.update({
-          walletAddress: firebase.firestore.FieldValue.delete(),
-          ton: firebase.firestore.FieldValue.delete()
-        });
-      }
+    // 🔄 Clear all storage keys
+    localStorage.removeItem('ton-connect-storage');
+    sessionStorage.clear();
 
-      // Reset UI
-      walletBtn.textContent = "Connect to Wallet";
-      document.getElementById("tonBalance").textContent = "0";
+    // 🔁 Reset the UI
+    walletBtn.textContent = "Connect to Wallet";
+    document.getElementById("tonBalance").textContent = "0";
 
-      // Clear localStorage if needed
-      localStorage.removeItem('ton-connect-storage');
-
-      // Re-initialize TonConnectUI with event handler
+    // 🔄 Re-initialize TonConnectUI with a slight delay
+    setTimeout(() => {
       initTonConnectUI(user, walletBtn);
-    } else {
-      await tonConnectUI.openModal();
+    }, 100);
+
+    // ❌ Also update Firebase
+    if (user) {
+      const userRef = db.collection("users").doc(String(user.id));
+      await userRef.update({
+        walletAddress: firebase.firestore.FieldValue.delete(),
+        ton: firebase.firestore.FieldValue.delete()
+      });
     }
-  };
+
+    alert("Wallet disconnected. You can now connect a new one.");
+  } else {
+    // Show wallet modal
+    await tonConnectUI.openModal();
+  }
+};
+
 
   tonConnectUI.onStatusChange(async (walletInfo) => {
     if (walletInfo?.account?.address) {
