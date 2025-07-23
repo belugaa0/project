@@ -290,69 +290,63 @@ function logEventCustom(eventName, details) {
 }
 
 // =============== TON CONNECT SETUP ================
-let tonConnectUI;
-let connectedWalletAddress = null;
+walletBtn.onclick = async () => {
+  const isConnected = tonConnectUI.connected?.account?.address;
 
-function setupWalletButton(user) {
-  const walletBtn = document.querySelector(".walletBtn");
-  if (!walletBtn || tonConnectUI) return;
+  if (isConnected) {
+    // Disconnect logic
+    await tonConnectUI.disconnect();
+    connectedWalletAddress = null;
+    walletBtn.textContent = "Connect to Wallet";
+    document.getElementById("tonBalance").textContent = "0";
 
- tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
-  manifestUrl: "https://belugaa0.github.io/project/tonconnect-manifest.json",
-  uiPreferences: {
-    language: "en",
-    theme: "DARK",
-    actionsConfiguration: {
-      returnStrategy: 'back',
-      openedStrategy: 'href', // this is the fix!
+    if (user) {
+      const userRef = db.collection("users").doc(String(user.id));
+      await userRef.update({
+        walletAddress: firebase.firestore.FieldValue.delete(),
+        ton: firebase.firestore.FieldValue.delete()
+      });
     }
-  }
-});
+  } else {
+    // Manually trigger wallet connection via redirect
+    const walletsList = await tonConnectUI.getWallets(); // Fetch all available wallets
 
+    const tonkeeper = walletsList.find(w => w.name.toLowerCase().includes("tonkeeper"));
+    if (!tonkeeper) {
+      alert("Tonkeeper not found. Please install it.");
+      return;
+    }
 
-  walletBtn.onclick = async () => {
-    const isConnected = tonConnectUI.connected?.account?.address;
+    const { universalLink, bridgeUrl } = tonkeeper;
 
-    if (isConnected) {
-      // 🔌 Disconnect wallet
-      await tonConnectUI.disconnect();
-      connectedWalletAddress = null;
-      walletBtn.textContent = "Connect to Wallet";
-      document.getElementById("tonBalance").textContent = "0";
+    // Now connect via redirect
+    await tonConnectUI.connectWallet({
+      universalLink,
+      bridgeUrl
+    });
 
-      // ❌ Remove wallet from Firebase (optional)
+    // Handle connected state
+    const wallet = tonConnectUI.connected;
+    if (wallet?.account?.address) {
+      connectedWalletAddress = wallet.account.address;
+      const short = `${connectedWalletAddress.slice(0, 4)}...${connectedWalletAddress.slice(-4)}`;
+      walletBtn.textContent = `Disconnect (${short})`;
+
+      // Save to Firestore
       if (user) {
         const userRef = db.collection("users").doc(String(user.id));
-        await userRef.update({
-          walletAddress: firebase.firestore.FieldValue.delete(),
-          ton: firebase.firestore.FieldValue.delete()
-        });
-      }
-    } else {
-      // 🔗 Connect wallet
-      await tonConnectUI.connectWallet();
-      const wallet = tonConnectUI.connected;
+        await userRef.set({ walletAddress: connectedWalletAddress }, { merge: true });
 
-      if (wallet?.account?.address) {
-        connectedWalletAddress = wallet.account.address;
-        const short = `${connectedWalletAddress.slice(0, 4)}...${connectedWalletAddress.slice(-4)}`;
-        walletBtn.textContent = `Disconnect (${short})`;
-
-        // Save to Firebase
-        if (user) {
-          const userRef = db.collection("users").doc(String(user.id));
-          await userRef.set({ walletAddress: connectedWalletAddress }, { merge: true });
-
-          const balance = await fetchTonBalance(connectedWalletAddress);
-          if (!isNaN(balance)) {
-            document.getElementById("tonBalance").textContent = balance;
-            await userRef.set({ ton: balance }, { merge: true });
-          }
+        const balance = await fetchTonBalance(connectedWalletAddress);
+        if (!isNaN(balance)) {
+          document.getElementById("tonBalance").textContent = balance;
+          await userRef.set({ ton: balance }, { merge: true });
         }
       }
     }
-  };
-}
+  }
+};
+
 
 
 
