@@ -321,3 +321,42 @@ h1 {
 .hide {
   display: none;
 }
+
+
+.navbar-left {
+  display: flex;
+  align-items: center;
+  gap: 1vw;
+}
+
+.internalTon-navbar {
+  font-size: 1.2vw;
+  color: gold;
+  padding: 0.5vh 1vw;
+  background-color: #262626;
+  border: 0.2vh solid gold;
+  border-radius: 1vh;
+}
+
+.internalTonBox {
+  display: flex;
+  justify-content: space-between;
+  padding: 0 1vw;
+}
+
+.balanceContainer {
+  width: 250px;
+  height: auto;
+  margin: 30px auto;
+  border: 1px solid gold;
+  border-radius: 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 1vh;
+  text-align: center;
+  padding: 2vh 1vw;
+}
+
+.balanceContainer p {
+  font-size: 1.2vw;
+}
