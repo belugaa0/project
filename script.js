@@ -300,33 +300,50 @@ function setupWalletButton(user) {
     manifestUrl: "https://belugaa0.github.io/project/tonconnect-manifest.json"
   });
 
-  walletBtn.addEventListener("click", async () => {
-    try {
-      await tonConnectUI.connectWallet();
-      const connectedWallet = tonConnectUI.connected;
+  async function updateButtonUI() {
+    const wallet = tonConnectUI.connected;
+    if (wallet?.account?.address) {
+      const walletAddress = wallet.account.address;
+      walletBtn.textContent = `Disconnect (${walletAddress.slice(0, 4)}...${walletAddress.slice(-4)})`;
 
-      if (connectedWallet?.account?.address) {
-        const walletAddress = connectedWallet.account.address;
-        walletBtn.textContent = `Connected: ${walletAddress.slice(0, 4)}...${walletAddress.slice(-4)}`;
+      // Save to Firestore
+      if (user) {
+        const userRef = db.collection("users").doc(String(user.id));
+        await userRef.set({ walletAddress }, { merge: true });
 
-        // Save to Firestore
-        if (user) {
-          const userRef = db.collection("users").doc(String(user.id));
-          await userRef.set({ walletAddress }, { merge: true });
-
-          const balance = await fetchTonBalance(walletAddress);
-          if (!isNaN(balance)) {
-            await userRef.set({ ton: balance }, { merge: true });
-            document.getElementById("tonBalance").textContent = balance;
-          }
+        // Fetch and display balance
+        const balance = await fetchTonBalance(walletAddress);
+        if (!isNaN(balance)) {
+          await userRef.set({ ton: balance }, { merge: true });
+          const tonElem = document.getElementById("tonBalance");
+          if (tonElem) tonElem.textContent = balance;
         }
       }
-    } catch (err) {
-      console.error("Wallet connection failed:", err);
+    } else {
+      walletBtn.textContent = "Connect to Wallet";
+      const tonElem = document.getElementById("tonBalance");
+      if (tonElem) tonElem.textContent = "0";
     }
-  });
-}
+  }
 
+  walletBtn.addEventListener("click", async () => {
+    const isConnected = !!tonConnectUI.connected?.account?.address;
+    if (isConnected) {
+      tonConnectUI.disconnect();
+    } else {
+      try {
+        await tonConnectUI.connectWallet();
+      } catch (err) {
+        console.error("Wallet connection failed:", err);
+      }
+    }
+
+    await updateButtonUI();
+  });
+
+  // Call on load
+  updateButtonUI();
+}
 
 async function fetchTonBalance(walletAddress) {
   try {
@@ -338,6 +355,7 @@ async function fetchTonBalance(walletAddress) {
     return 0;
   }
 }
+
 
 // ================= FLAPPY BIRD SCORE REWARD ===================
 window.addEventListener("message", async (event) => {
