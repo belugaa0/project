@@ -60,6 +60,22 @@ function updateNavbarBalance(user) {
     }).catch(err => console.error("Error fetching navbar balance:", err));
 }
 
+function updateTonBalancesUI(user) {
+  db.collection("users").doc(String(user.id)).get().then(doc => {
+    if (!doc.exists) return;
+
+    const ton = doc.data().ton || 0;
+    const internal = doc.data().internalTonBalance || 0;
+
+    const tonElem = document.getElementById("tonBalance");
+    const internalElem = document.getElementById("internalTonBalance");
+
+    if (tonElem) tonElem.textContent = ton.toFixed(2);
+    if (internalElem) internalElem.textContent = internal.toFixed(2);
+  });
+}
+
+
 function showProfileView() {
     const tg = window.Telegram?.WebApp;
     tg?.expand?.();
@@ -97,6 +113,7 @@ function showProfileView() {
     document.getElementById('profile-view').style.display = 'block';
 
     setupWalletButton(user); // 👈 Connect wallet when profile is shown
+    updateTonBalancesUI(user);
 
 }
 
@@ -305,6 +322,43 @@ function setupWalletButton(user) {
 
   initTonConnectUI(user, walletBtn);
 }
+
+async function topUpInternalBalance() {
+  const amount = parseFloat(document.getElementById("topupAmount").value);
+  if (isNaN(amount) || amount <= 0) {
+    return alert("Enter a valid TON amount.");
+  }
+
+  const user = window.Telegram?.WebApp?.initDataUnsafe?.user;
+  if (!user) return alert("User not found.");
+
+  const userRef = db.collection("users").doc(String(user.id));
+  const doc = await userRef.get();
+
+  const walletTon = doc.data().ton || 0;
+  const internalTon = doc.data().internalTonBalance || 0;
+
+  if (walletTon < amount) {
+    return alert("Not enough TON in your wallet.");
+  }
+
+  await db.runTransaction(async (tx) => {
+    const snap = await tx.get(userRef);
+    const prevTon = snap.data().ton || 0;
+    const prevInternal = snap.data().internalTonBalance || 0;
+
+    tx.update(userRef, {
+      ton: parseFloat((prevTon - amount).toFixed(4)),
+      internalTonBalance: parseFloat((prevInternal + amount).toFixed(4))
+    });
+  });
+
+  alert(`Topped up ${amount} TON to your Arcadium balance.`);
+
+  document.getElementById("topupAmount").value = '';
+  updateTonBalancesUI(user); // 👈 refresh display
+}
+
 
 function initTonConnectUI(user, walletBtn) {
   tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
