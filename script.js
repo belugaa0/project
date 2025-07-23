@@ -347,24 +347,34 @@ function initTonConnectUI(user, walletBtn) {
 
 
   // ✅ ✅ ✅ MOVE THIS INSIDE HERE
-  tonConnectUI.onStatusChange(async (walletInfo) => {
-    if (walletInfo?.account?.address) {
-      const walletAddress = walletInfo.account.address;
-      const short = `${walletAddress.slice(0, 4)}...${walletAddress.slice(-4)}`;
-      walletBtn.textContent = `Disconnect (${short})`;
+ tonConnectUI.onStatusChange(async (walletInfo) => {
+  if (walletInfo?.account?.address) {
+    const walletAddress = walletInfo.account.address;
+    const short = `${walletAddress.slice(0, 4)}...${walletAddress.slice(-4)}`;
+    walletBtn.textContent = `Disconnect (${short})`;
 
-      if (user) {
-        const userRef = db.collection("users").doc(String(user.id));
-        await userRef.set({ walletAddress }, { merge: true });
+    if (user) {
+      const userRef = db.collection("users").doc(String(user.id));
+      await userRef.set({ walletAddress }, { merge: true });
 
-        const balance = await fetchTonBalance(walletAddress);
-        if (!isNaN(balance)) {
-          await userRef.set({ ton: balance }, { merge: true });
-          document.getElementById("tonBalance").textContent = balance;
+      const balance = await fetchTonBalance(walletAddress);
+      if (!isNaN(balance)) {
+        await userRef.set({ ton: balance }, { merge: true });
+
+        // ✅ Update UI for TON
+        document.getElementById("tonBalance").textContent = balance;
+
+        // ✅ Also update coin balance in navbar and profile
+        updateNavbarBalance(user);
+        const profileCoins = document.getElementById("coinBalance");
+        if (profileCoins) {
+          profileCoins.textContent = balance.toFixed(2); // or leave it if balance !== coins
         }
       }
     }
-  });
+  }
+});
+
 }
 
 
