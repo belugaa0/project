@@ -1,120 +1,162 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Arcadium</title>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Arcadium</title>
 
-<script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
-  <link rel="stylesheet" href="style.css"/>
-  <link href='https://cdn.boxicons.com/fonts/basic/boxicons.min.css' rel='stylesheet'>
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
-</head>
+    <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
+    <link rel="stylesheet" href="style.css" />
+    <link
+      href="https://cdn.boxicons.com/fonts/basic/boxicons.min.css"
+      rel="stylesheet"
+    />
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  </head>
 
-<body>
-<div class="main">
-  <div id="ton-connect-button-root" style="display:none;"></div>
+  <body>
+    <div class="main">
+      <div id="ton-connect-button-root" style="display: none"></div>
 
-  <div class="navbar">
-  <div class="navbar-left">
-    <img src="logo1.jpg" alt="Arcadium Logo"/>
-    
-    <!-- Internal TON Balance beside logo -->
-    <div class="internalTon-navbar">
-      💎 TON: <span id="internalTonBalance">0</span>
-    </div>
-  </div>
+      <div class="navbar">
+        <div class="navbar-left">
+          <img src="logo1.jpg" alt="Arcadium Logo" />
 
-  <div class="profile">
-    <p class="balance">0.00</p>
-    <div class="telegram-profile">
-      <img id="profile-pic" class="profile-pic" src="user.png" alt="Profile Picture" onclick="showProfileView()"/>
-    </div>
-  </div>
-</div>
+          <!-- Internal TON Balance beside logo -->
+          <div class="internalTon-navbar">
+            💎 TON: <span id="internalTonBalance">0</span>
+          </div>
+        </div>
 
-
-
-  <div id="game-list-view">
-    <h1>Games</h1>
-    <div class="game-container">
-      <div class="game-box" onclick="showGameDetail('Flappy Bird')">
-        <img src="Flappy_Bird.png" alt="Flappy Bird"/>
-        <p>Flappy Bird</p>
+        <div class="profile">
+          <p class="balance">0.00</p>
+          <div class="telegram-profile">
+            <img
+              id="profile-pic"
+              class="profile-pic"
+              src="user.png"
+              alt="Profile Picture"
+              onclick="showProfileView()"
+            />
+          </div>
+        </div>
       </div>
-      <div class="game-box" onclick="showGameDetail('Tic Tac Toe')">
-        <img src="tic_tac_toe.png" alt="Tic Tac Toe"/>
-        <p>Tic Tac Toe</p>
+
+      <div id="game-list-view">
+        <h1>Games</h1>
+        <div class="game-container">
+          <div class="game-box" onclick="showGameDetail('Flappy Bird')">
+            <img src="Flappy_Bird.png" alt="Flappy Bird" />
+            <p>Flappy Bird</p>
+          </div>
+          <div class="game-box" onclick="showGameDetail('Tic Tac Toe')">
+            <img src="tic_tac_toe.png" alt="Tic Tac Toe" />
+            <p>Tic Tac Toe</p>
+          </div>
+          <div class="game-box" onclick="showGameDetail('Snake')">
+            <img src="Flappy_Bird.png" alt="Snake" />
+            <p>Snake</p>
+          </div>
+          <div class="game-box" onclick="showGameDetail('Tetris')">
+            <img src="Flappy_Bird.png" alt="Tetris" />
+            <p>Tetris</p>
+          </div>
+        </div>
       </div>
-      <div class="game-box" onclick="showGameDetail('Snake')">
-        <img src="Flappy_Bird.png" alt="Snake"/>
-        <p>Snake</p>
+
+      <div id="game-detail-view" style="display: none">
+        <div class="game-image">
+          <img id="game-detail-img" src="" alt="Game Image" />
+        </div>
+        <div class="game-name">
+          <h1 id="game-detail-title"></h1>
+        </div>
+        <div class="game-intro">
+          <p id="game-detail-intro"></p>
+        </div>
+        <div class="game-gallery" id="game-detail-gallery"></div>
+        <div class="buttons">
+          <button class="play-button" onclick="playGame()">Play</button>
+          <button class="back-button" onclick="showGameList()">Back</button>
+        </div>
       </div>
-      <div class="game-box" onclick="showGameDetail('Tetris')">
-        <img src="Flappy_Bird.png" alt="Tetris"/>
-        <p>Tetris</p>
+
+      <div id="profile-view" style="display: none">
+        <button class="backBtn" onclick="showGameList()">
+          <i class="bx bx-chevron-left"></i>
+        </button>
+
+        <!-- Profile Picture and Name -->
+        <div class="profileContainer">
+          <img class="profilePic" id="profilePic" src="user.png" />
+          <p class="userName" id="userName">UserName</p>
+        </div>
+
+        <!-- Coin and TON Balance -->
+        <div class="balanceContainer">
+          <div class="coinBox">
+            <p>Coins:</p>
+            <p id="coinBalance">0</p>
+          </div>
+          <div class="tonBox">
+            <p>Ton Balance:</p>
+            <p id="tonBalance">0</p>
+          </div>
+          <div class="internalTonBox">
+            <p>Internal TON:</p>
+            <p id="internalTonBalance">0</p>
+          </div>
+          <div class="tonActions">
+            <button class="depositBtn" onclick="openDepositModal()">
+              Deposit
+            </button>
+            <button class="withdrawBtn" onclick="openWithdrawModal()">
+              Withdraw
+            </button>
+          </div>
+        </div>
+
+        <!-- Wallet Button -->
+        <div class="wallet">
+          <button class="walletBtn">Connect to Wallet</button>
+        </div>
+      </div>
+
+      <div id="flappy-container" style="display: none"></div>
+    </div>
+
+    <!-- Deposit Modal -->
+    <div id="depositModal" class="modal">
+      <div class="modal-content">
+        <span class="close" onclick="closeDepositModal()">&times;</span>
+        <h3>Deposit TON</h3>
+        <input
+          type="number"
+          placeholder="Amount to deposit"
+          id="depositAmount"
+        />
+        <button onclick="handleDeposit()">Confirm Deposit</button>
       </div>
     </div>
-  </div>
 
-  <div id="game-detail-view" style="display: none;">
-    <div class="game-image">
-      <img id="game-detail-img" src="" alt="Game Image"/>
+    <!-- Withdraw Modal -->
+    <div id="withdrawModal" class="modal">
+      <div class="modal-content">
+        <span class="close" onclick="closeWithdrawModal()">&times;</span>
+        <h3>Withdraw TON</h3>
+        <input type="text" placeholder="TON Address" id="withdrawAddress" />
+        <input
+          type="number"
+          placeholder="Amount to withdraw"
+          id="withdrawAmount"
+        />
+        <button onclick="handleWithdraw()">Confirm Withdraw</button>
+      </div>
     </div>
-    <div class="game-name">
-      <h1 id="game-detail-title"></h1>
-    </div>
-    <div class="game-intro">
-      <p id="game-detail-intro"></p>
-    </div>
-    <div class="game-gallery" id="game-detail-gallery"></div>
-    <div class="buttons">
-      <button class="play-button" onclick="playGame()">Play</button>
-      <button class="back-button" onclick="showGameList()">Back</button>
-    </div>
-  </div>
 
-  <div id="profile-view" style="display: none;">
-  <button class="backBtn" onclick="showGameList()">
-    <i class='bx bx-chevron-left'></i>
-  </button>
-
-  <!-- Profile Picture and Name -->
-  <div class="profileContainer">
-    <img class="profilePic" id="profilePic" src="user.png" />
-    <p class="userName" id="userName">UserName</p>
-  </div>
-
-  <!-- Coin and TON Balance -->
-  <div class="balanceContainer">
-    <div class="coinBox">
-      <p>Coins:</p>
-      <p id="coinBalance">0</p>
-    </div>
-    <div class="tonBox">
-      <p>Ton Balance:</p>
-      <p id="tonBalance">0</p>
-    </div>
-    <div class="internalTonBox">
-      <p>Internal TON:</p>
-      <p id="internalTonBalance">0</p>
-    </div>
-  </div>
-
-  <!-- Wallet Button -->
-  <div class="wallet">
-    <button class="walletBtn">Connect to Wallet</button>
-  </div>
-</div>
-
-<div id="flappy-container" style="display:none;"></div>
-
-
-</div>
-
-<!-- Firebase SDK -->
-<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-<script src="script.js"></script>
-</body>
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="script.js"></script>
+  </body>
 </html>

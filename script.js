@@ -487,3 +487,40 @@ window.addEventListener("message", async (event) => {
         }
     }
 });
+
+
+
+// Modal Controls
+function openDepositModal() {
+  document.getElementById("depositModal").style.display = "flex";
+}
+
+function closeDepositModal() {
+  document.getElementById("depositModal").style.display = "none";
+}
+
+function openWithdrawModal() {
+  document.getElementById("withdrawModal").style.display = "flex";
+}
+
+function closeWithdrawModal() {
+  document.getElementById("withdrawModal").style.display = "none";
+}
+
+// Example handlers (you can customize logic)
+function handleDeposit() {
+  const amount = document.getElementById("depositAmount").value;
+  if (amount && Number(amount) > 0) {
+    alert(`Deposited ${amount} TON`);
+    closeDepositModal();
+  }
+}
+
+function handleWithdraw() {
+  const address = document.getElementById("withdrawAddress").value;
+  const amount = document.getElementById("withdrawAmount").value;
+  if (address && amount && Number(amount) > 0) {
+    alert(`Withdrew ${amount} TON to ${address}`);
+    closeWithdrawModal();
+  }
+}
