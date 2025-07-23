@@ -89,6 +89,9 @@ function showProfileView() {
     document.getElementById('game-detail-view').style.display = 'none';
     document.getElementById('flappy-container').style.display = 'none';
     document.getElementById('profile-view').style.display = 'block';
+
+    setupWalletButton(user); // 👈 Connect wallet when profile is shown
+
 }
 
 // ================= GAME DISPLAY ===================
@@ -287,38 +290,43 @@ function logEventCustom(eventName, details) {
 }
 
 // =============== TON CONNECT SETUP ================
+let tonConnectUI;
+
 function setupWalletButton(user) {
   const walletBtn = document.querySelector(".walletBtn");
+  if (!walletBtn || tonConnectUI) return;
 
-  const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
-    manifestUrl: "https://belugaa0.github.io/project/tonconnect-manifest.json",
-    buttonRootId: "", // We are not using the default widget UI
+  tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
+    manifestUrl: "https://belugaa0.github.io/project/tonconnect-manifest.json"
   });
 
   walletBtn.addEventListener("click", async () => {
-    await tonConnectUI.connectWallet();
-    const connectedWallet = tonConnectUI.connected;
+    try {
+      await tonConnectUI.connectWallet();
+      const connectedWallet = tonConnectUI.connected;
 
-    if (connectedWallet?.account?.address) {
-      const walletAddress = connectedWallet.account.address;
-      walletBtn.textContent = `Connected: ${walletAddress.slice(0, 4)}...${walletAddress.slice(-4)}`;
+      if (connectedWallet?.account?.address) {
+        const walletAddress = connectedWallet.account.address;
+        walletBtn.textContent = `Connected: ${walletAddress.slice(0, 4)}...${walletAddress.slice(-4)}`;
 
-      // Save wallet address to Firestore
-      if (user) {
-        const userRef = db.collection("users").doc(String(user.id));
-        await userRef.set({ walletAddress }, { merge: true });
+        // Save to Firestore
+        if (user) {
+          const userRef = db.collection("users").doc(String(user.id));
+          await userRef.set({ walletAddress }, { merge: true });
+
+          const balance = await fetchTonBalance(walletAddress);
+          if (!isNaN(balance)) {
+            await userRef.set({ ton: balance }, { merge: true });
+            document.getElementById("tonBalance").textContent = balance;
+          }
+        }
       }
-
-      // Optional: Fetch TON balance (testnet)
-      const balance = await fetchTonBalance(walletAddress);
-      if (!isNaN(balance)) {
-        const userRef = db.collection("users").doc(String(user.id));
-        await userRef.set({ ton: balance }, { merge: true });
-        document.getElementById("tonBalance").textContent = balance;
-      }
+    } catch (err) {
+      console.error("Wallet connection failed:", err);
     }
   });
 }
+
 
 async function fetchTonBalance(walletAddress) {
   try {
