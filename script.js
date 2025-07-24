@@ -508,13 +508,104 @@ function closeWithdrawModal() {
 }
 
 // Example handlers (you can customize logic)
-function handleDeposit() {
-  const amount = document.getElementById("depositAmount").value;
-  if (amount && Number(amount) > 0) {
-    alert(`Deposited ${amount} TON`);
+async function handleDeposit() {
+  const amountInput = document.getElementById("depositAmount");
+  const amount = parseFloat(amountInput.value);
+
+  if (isNaN(amount) || amount <= 0) {
+    return alert("Enter a valid TON amount.");
+  }
+
+  const wallet = tonConnectUI.wallet;
+  const user = window.Telegram?.WebApp?.initDataUnsafe?.user;
+
+  if (!wallet || !user) {
+    return alert("Please connect your wallet first.");
+  }
+
+  const nanoTON = Math.round(amount * 1e9); // TON → nanoTON
+  const bankAddress = "0:6da5d6494e6928bf830486ce8479b05f4deb23400d280bcd14bd8af0580d05d3";
+
+  const tx = {
+    validUntil: Math.floor(Date.now() / 1000) + 600,
+    messages: [
+      {
+        address: bankAddress,
+        amount: nanoTON.toString(),
+      },
+    ],
+  };
+
+  try {
+    await tonConnectUI.sendTransaction(tx);
+    alert(`✅ Sent ${amount} TON to Arcadium Bank!\nNow verifying your deposit...`);
+
+    amountInput.value = "";
     closeDepositModal();
+
+    logEventCustom("TON Deposit Sent", {
+      amount,
+      to: bankAddress
+    });
+
+    // Start verifying deposit after short delay
+    setTimeout(() => {
+      verifyUserDeposit(wallet.account.address, bankAddress, amount, user.id);
+    }, 1000);
+
+  } catch (e) {
+    console.error("Transaction failed", e);
+    alert("❌ Transaction failed or rejected.");
   }
 }
+
+async function verifyUserDeposit(userWalletAddress, bankWalletAddress, expectedAmount, userId) {
+  const maxTries = 15;
+  let tries = 0;
+
+  const interval = setInterval(async () => {
+    tries++;
+    if (tries > maxTries) {
+      clearInterval(interval);
+      console.warn("Deposit verification timed out.");
+      alert("⚠️ Couldn't verify deposit. Try again later.");
+      return;
+    }
+
+    try {
+      const res = await fetch(`https://tonapi.io/v2/blockchain/accounts/${bankWalletAddress}/transactions?limit=10`);
+      const data = await res.json();
+      const txs = data.transactions;
+
+      const matchingTx = txs.find(tx => {
+        return tx.in_msg?.source?.toLowerCase() === userWalletAddress.toLowerCase() &&
+               parseFloat(tx.in_msg?.value || "0") / 1e9 >= expectedAmount;
+      });
+
+      if (matchingTx) {
+        clearInterval(interval);
+        console.log("✅ Deposit verified on chain!");
+
+        // Update internal balance in Firebase
+        const userRef = db.collection("users").doc(String(userId));
+        await db.runTransaction(async (tx) => {
+          const snap = await tx.get(userRef);
+          const currentBalance = snap.data().internalTonBalance || 0;
+          const newBalance = parseFloat((currentBalance + expectedAmount).toFixed(4));
+          tx.update(userRef, { internalTonBalance: newBalance });
+        });
+
+        alert(`🎉 ${expectedAmount} TON has been added to your internal Arcadium balance.`);
+        updateTonBalancesUI({ id: userId });
+      }
+
+    } catch (err) {
+      console.error("Error verifying deposit:", err);
+    }
+
+  }, 4000); // check every 4 sec
+}
+
 
 function handleWithdraw() {
   const address = document.getElementById("withdrawAddress").value;
