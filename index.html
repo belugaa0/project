@@ -5,29 +5,38 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Arcadium</title>
 
+    <!-- TON Connect -->
     <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
-    <link rel="stylesheet" href="style.css" />
-    <link
-      href="https://cdn.boxicons.com/fonts/basic/boxicons.min.css"
-      rel="stylesheet"
-    />
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+
+    <!-- Telegram WebApp SDK -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="style.css" />
+    <link href="https://cdn.boxicons.com/fonts/basic/boxicons.min.css" rel="stylesheet" />
   </head>
 
   <body>
     <div class="main">
+      <!-- TON Connect Wallet Button (hidden, managed by JS) -->
       <div id="ton-connect-button-root" style="display: none"></div>
 
+      <!-- Navbar -->
       <div class="navbar">
         <div class="navbar-left">
           <img src="logo1.jpg" alt="Arcadium Logo" />
 
-          <!-- Internal TON Balance beside logo -->
+          <!-- Internal TON Balance -->
           <div class="internalTon-navbar">
             💎 TON: <span id="internalTonBalance">0</span>
           </div>
         </div>
 
+        <!-- Profile Section -->
         <div class="profile">
           <p class="balance">0.00</p>
           <div class="telegram-profile">
@@ -42,6 +51,7 @@
         </div>
       </div>
 
+      <!-- Game List View -->
       <div id="game-list-view">
         <h1>Games</h1>
         <div class="game-container">
@@ -64,6 +74,7 @@
         </div>
       </div>
 
+      <!-- Game Detail View -->
       <div id="game-detail-view" style="display: none">
         <div class="game-image">
           <img id="game-detail-img" src="" alt="Game Image" />
@@ -81,18 +92,17 @@
         </div>
       </div>
 
+      <!-- Profile View -->
       <div id="profile-view" style="display: none">
         <button class="backBtn" onclick="showGameList()">
           <i class="bx bx-chevron-left"></i>
         </button>
 
-        <!-- Profile Picture and Name -->
         <div class="profileContainer">
           <img class="profilePic" id="profilePic" src="user.png" />
           <p class="userName" id="userName">UserName</p>
         </div>
 
-        <!-- Coin and TON Balance -->
         <div class="balanceContainer">
           <div class="coinBox">
             <p>Coins:</p>
@@ -106,22 +116,20 @@
             <p>Internal TON:</p>
             <p id="internalTonBalance">0</p>
           </div>
+
           <div class="tonActions">
-            <button class="depositBtn" onclick="openDepositModal()">
-              Deposit
-            </button>
-            <button class="withdrawBtn" onclick="openWithdrawModal()">
-              Withdraw
-            </button>
+            <button class="depositBtn" onclick="openDepositModal()">Deposit</button>
+            <button class="withdrawBtn" onclick="openWithdrawModal()">Withdraw</button>
           </div>
         </div>
 
-        <!-- Wallet Button -->
+        <!-- Manual Wallet Connect Button -->
         <div class="wallet">
-          <button class="walletBtn">Connect to Wallet</button>
+          <button class="walletBtn" id="walletButton">Connect to Wallet</button>
         </div>
       </div>
 
+      <!-- Game Containers -->
       <div id="flappy-container" style="display: none"></div>
     </div>
 
@@ -130,11 +138,7 @@
       <div class="modal-content">
         <span class="close" onclick="closeDepositModal()">&times;</span>
         <h3>Deposit TON</h3>
-        <input
-          type="number"
-          placeholder="Amount to deposit"
-          id="depositAmount"
-        />
+        <input type="number" placeholder="Amount to deposit" id="depositAmount" />
         <button onclick="handleDeposit()">Confirm Deposit</button>
       </div>
     </div>
@@ -145,18 +149,12 @@
         <span class="close" onclick="closeWithdrawModal()">&times;</span>
         <h3>Withdraw TON</h3>
         <input type="text" placeholder="TON Address" id="withdrawAddress" />
-        <input
-          type="number"
-          placeholder="Amount to withdraw"
-          id="withdrawAmount"
-        />
+        <input type="number" placeholder="Amount to withdraw" id="withdrawAmount" />
         <button onclick="handleWithdraw()">Confirm Withdraw</button>
       </div>
     </div>
 
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <!-- Main Logic -->
     <script src="script.js"></script>
   </body>
 </html>

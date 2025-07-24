@@ -43,13 +43,14 @@ body, html {
 .balance {
   border: 0.3vh solid gold;
   border-radius: 12px;
-  width: 8vw;
-  height: 4vh;
+  padding: 0.4vh 1vw; /* top-bottom & left-right spacing */
   display: flex;
   justify-content: center;
   align-items: center;
   font-size: 1.2rem;
+  white-space: nowrap; /* prevents text from wrapping */
 }
+
 
 .telegram-profile {
   display: flex;
