@@ -17,7 +17,10 @@
 
     <!-- Styles -->
     <link rel="stylesheet" href="style.css" />
-    <link href="https://cdn.boxicons.com/fonts/basic/boxicons.min.css" rel="stylesheet" />
+    <link
+      href="https://cdn.boxicons.com/fonts/basic/boxicons.min.css"
+      rel="stylesheet"
+    />
   </head>
 
   <body>
@@ -32,7 +35,7 @@
 
           <!-- Internal TON Balance -->
           <div class="internalTon-navbar">
-            💎 TON: <span id="internalTonBalance">0</span>
+            💎 TON: <span id="internalTonBalanceNavbar">0</span>
           </div>
         </div>
 
@@ -114,12 +117,16 @@
           </div>
           <div class="internalTonBox">
             <p>Internal TON:</p>
-            <p id="internalTonBalance">0</p>
+            <p id="internalTonBalanceProfile">0</p>
           </div>
 
           <div class="tonActions">
-            <button class="depositBtn" onclick="openDepositModal()">Deposit</button>
-            <button class="withdrawBtn" onclick="openWithdrawModal()">Withdraw</button>
+            <button class="depositBtn" onclick="openDepositModal()">
+              Deposit
+            </button>
+            <button class="withdrawBtn" onclick="openWithdrawModal()">
+              Withdraw
+            </button>
           </div>
         </div>
 
@@ -138,7 +145,11 @@
       <div class="modal-content">
         <span class="close" onclick="closeDepositModal()">&times;</span>
         <h3>Deposit TON</h3>
-        <input type="number" placeholder="Amount to deposit" id="depositAmount" />
+        <input
+          type="number"
+          placeholder="Amount to deposit"
+          id="depositAmount"
+        />
         <button onclick="handleDeposit()">Confirm Deposit</button>
       </div>
     </div>
@@ -149,7 +160,11 @@
         <span class="close" onclick="closeWithdrawModal()">&times;</span>
         <h3>Withdraw TON</h3>
         <input type="text" placeholder="TON Address" id="withdrawAddress" />
-        <input type="number" placeholder="Amount to withdraw" id="withdrawAmount" />
+        <input
+          type="number"
+          placeholder="Amount to withdraw"
+          id="withdrawAmount"
+        />
         <button onclick="handleWithdraw()">Confirm Withdraw</button>
       </div>
     </div>
